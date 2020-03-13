@@ -21,7 +21,6 @@ class BatchBake(bpy.types.Operator):
         return {'FINISHED'}
 
     def prepare_bake(self):
-        # TODO can i use self.context, too?
         bpy.data.scenes[bpy.context.scene.name].render.engine = "CYCLES"
 
         self.bake_material = bpy.data.materials.new(
@@ -58,10 +57,15 @@ class BatchBake(bpy.types.Operator):
     def bake_maps(self):
         if (self.context.scene.bake_diffuse):
             self.bake_diffuse()
+        if (self.context.scene.bake_normal):
+            self.bake_normal()
+        if (self.context.scene.bake_ao):
+            self.bake_ao()
 
     def clean_up(self):
         print('clean up the mess!')
 
+    # TODO dry!
     def bake_diffuse(self):
         bpy.context.scene.cycles.samples = 1
         bpy.context.scene.render.bake.use_pass_direct = False
@@ -72,5 +76,31 @@ class BatchBake(bpy.types.Operator):
                             use_selected_to_active=True)
 
         self.bake_image.filepath_raw = self.context.scene.bake_out_path + self.context.scene.lowpoly_bake_obj + '_diffuse.jpg'
+        self.bake_image.file_format = 'JPEG'
+        self.bake_image.save()
+
+    def bake_normal(self):
+        bpy.context.scene.cycles.samples = 1
+        bpy.context.scene.render.bake.use_pass_direct = False
+        bpy.context.scene.render.bake.use_pass_indirect = False
+        bpy.context.scene.render.bake.use_pass_color = True
+        bpy.ops.object.bake(type='NORMAL',
+                            use_clear=True,
+                            use_selected_to_active=True)
+
+        self.bake_image.filepath_raw = self.context.scene.bake_out_path + self.context.scene.lowpoly_bake_obj + '_normal.jpg'
+        self.bake_image.file_format = 'JPEG'
+        self.bake_image.save()
+
+    def bake_ao(self):
+        bpy.context.scene.cycles.samples = 32
+        bpy.context.scene.render.bake.use_pass_direct = False
+        bpy.context.scene.render.bake.use_pass_indirect = False
+        bpy.context.scene.render.bake.use_pass_color = True
+        bpy.ops.object.bake(type='AO',
+                            use_clear=True,
+                            use_selected_to_active=True)
+
+        self.bake_image.filepath_raw = self.context.scene.bake_out_path + self.context.scene.lowpoly_bake_obj + '_ao.jpg'
         self.bake_image.file_format = 'JPEG'
         self.bake_image.save()
