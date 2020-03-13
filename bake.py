@@ -36,11 +36,10 @@ class BatchBake(bpy.types.Operator):
     def bootstrap_bake(self, low):
         self.prepare_bake(low)
         self.bake_maps(low)
-        #self.clean_up(low)
+        self.clean_up(low)
 
     def prepare_bake(self, low):
         bpy.data.objects[low].hide_render = False
-        bpy.data.objects[low].hide_viewport = False
 
         bpy.data.scenes[bpy.context.scene.name].render.engine = "CYCLES"
 
