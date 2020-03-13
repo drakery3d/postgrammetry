@@ -11,32 +11,41 @@ class BatchBake(bpy.types.Operator):
     context = None
     bake_material = None
     bake_image = None
+    high = None
 
     def execute(self, context):
         self.context = context
+        self.high = context.scene.highpoly_bake_obj
+
+        for obj in bpy.data.objects:
+            obj.hide_render = True
+            obj.hide_viewport = False
+        bpy.data.objects[self.high].hide_render = False
+        bpy.data.objects[self.high].hide_viewport = False
 
         if (self.context.scene.bake_multiple):
-            for obj in bpy.data.collections[
-                    self.context.scene.lowpoly_bake_obj].all_objects:
-                self.bootstrap_bake(self.context.scene.highpoly_bake_obj,
-                                    obj.name)
+            low_objects = bpy.data.collections[
+                context.scene.lowpoly_bake_obj].all_objects
+            for obj in low_objects:
+                self.bootstrap_bake(obj.name)
         else:
-            self.bootstrap_bake(self.context.scene.highpoly_bake_obj,
-                                self.context.scene.lowpoly_bake_obj)
+            self.bootstrap_bake(self.context.scene.lowpoly_bake_obj)
 
         return {'FINISHED'}
 
-    def bootstrap_bake(self, high, low):
-        self.prepare_bake(high, low)
-        self.check_setup()
-        self.bake_maps(high, low)
-        self.clean_up()
+    def bootstrap_bake(self, low):
+        self.prepare_bake(low)
+        self.bake_maps(low)
+        #self.clean_up(low)
 
-    def prepare_bake(self, high, low):
+    def prepare_bake(self, low):
+        bpy.data.objects[low].hide_render = False
+        bpy.data.objects[low].hide_viewport = False
+
         bpy.data.scenes[bpy.context.scene.name].render.engine = "CYCLES"
 
         self.bake_material = bpy.data.materials.new(name=low + '_bake')
-        if bpy.context.active_object.data.materials:
+        if bpy.data.objects[low].data.materials:
             bpy.data.objects[low].data.materials[0] = self.bake_material
         else:
             bpy.data.objects[low].data.materials.append(self.bake_material)
@@ -51,14 +60,10 @@ class BatchBake(bpy.types.Operator):
                                               height=512)
         bake_node.image = self.bake_image
 
-        # TODO make visible in viewport and for rendering
-        bpy.data.objects[high].select_set(True)
+        bpy.data.objects[self.high].select_set(True)
         bpy.context.view_layer.objects.active = bpy.data.objects[low]
 
-    def check_setup(self):
-        print('check if everythin is alright')
-
-    def bake_maps(self, high, low):
+    def bake_maps(self, low):
         if (self.context.scene.bake_diffuse):
             self.bake_diffuse(low)
         if (self.context.scene.bake_normal):
@@ -66,8 +71,8 @@ class BatchBake(bpy.types.Operator):
         if (self.context.scene.bake_ao):
             self.bake_ao(low)
 
-    def clean_up(self):
-        print('clean up the mess!')
+    def clean_up(self, low):
+        bpy.data.objects[low].hide_render = True
 
     # TODO dry!
     def bake_diffuse(self, low):
@@ -97,7 +102,6 @@ class BatchBake(bpy.types.Operator):
         self.bake_image.save()
 
     def bake_ao(self, low):
-        # hide all other objects from renderer
         bpy.context.scene.cycles.samples = 32
         bpy.context.scene.render.bake.use_pass_direct = False
         bpy.context.scene.render.bake.use_pass_indirect = False

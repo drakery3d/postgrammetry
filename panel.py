@@ -28,7 +28,7 @@ class BatchBakerPanel(bpy.types.Panel):
                                'lowpoly_bake_obj',
                                bpy.data,
                                'collections',
-                               text='Lowpoly')
+                               text='Lowpolys')
         else:
             layout.prop_search(context.scene,
                                'lowpoly_bake_obj',

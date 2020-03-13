@@ -4,7 +4,7 @@ bl_info = {
     'description':
     'Batch baking from low to high poly to multiple low poly meshes',
     'blender': (2, 80, 0),
-    'version': (0, 1, 0),
+    'version': (0, 2, 0),
     'location': 'View3D',
     'category': 'Generic'
 }
@@ -25,11 +25,9 @@ def register():
     bpy.types.Scene.highpoly_bake_obj = bpy.props.StringProperty(
         name='highpoly_bake_obj',
         description='The object you want to bake from')
-    # TODO multiple low poly objects (maybe use collection or multiselect)
     bpy.types.Scene.lowpoly_bake_obj = bpy.props.StringProperty(
         name='lowpoly_bake_obj',
         description='The object you want to bake onto')
-
     bpy.types.Scene.bake_multiple = bpy.props.BoolProperty(
         name='bake_multiple',
         description='Check if you want to bake onto multiple lowpoly meshes',
