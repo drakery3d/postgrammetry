@@ -30,6 +30,12 @@ def register():
         name='lowpoly_bake_obj',
         description='The object you want to bake onto')
 
+    bpy.types.Scene.bake_multiple = bpy.props.BoolProperty(
+        name='bake_multiple',
+        description='Check if you want to bake onto multiple lowpoly meshes',
+        default=True,
+    )
+
     bpy.types.Scene.bake_diffuse = bpy.props.BoolProperty(
         name='bake_diffuse',
         description='Check if you want to bake a diffuse map',
