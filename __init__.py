@@ -56,6 +56,13 @@ def register():
         description="The folder your maps will be saved to",
         subtype='DIR_PATH')
 
+    bpy.types.Scene.output_size = bpy.props.IntProperty(
+        name='output_size',
+        subtype="PIXEL",
+        description='Output size of texture maps in pixels',
+        default=2**10 * 8,
+    )
+
 
 def unregister():
     for cls in classes:
@@ -67,6 +74,7 @@ def unregister():
     del bpy.types.Scene.bake_normal
     del bpy.types.Scene.bake_ao
     del bpy.types.Scene.bake_out_path
+    del bpy.types.Scene.output_size
 
 
 if __name__ == '__main__':

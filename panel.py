@@ -43,8 +43,9 @@ class BatchBakerPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(context.scene, 'bake_ao', text='Ambient Occlusion')
 
-        col = layout.column()
-        col.prop(context.scene, 'bake_out_path', text='Output')
+        row = layout.column()
+        row.prop(context.scene, 'bake_out_path', text='Output')
+        row.prop(context.scene, 'output_size', text='Output size')
 
         row = layout.row()
         op = row.operator('bb.bake', text='Bake')

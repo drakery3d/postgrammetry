@@ -18,10 +18,8 @@ class BatchBake(bpy.types.Operator):
         self.high = context.scene.highpoly_bake_obj
 
         for obj in bpy.data.objects:
-            obj.hide_render = True
+            obj.hide_render = False
             obj.hide_viewport = False
-        bpy.data.objects[self.high].hide_render = False
-        bpy.data.objects[self.high].hide_viewport = False
 
         if (self.context.scene.bake_multiple):
             low_objects = bpy.data.collections[
@@ -39,8 +37,6 @@ class BatchBake(bpy.types.Operator):
         self.clean_up(low)
 
     def prepare_bake(self, low):
-        bpy.data.objects[low].hide_render = False
-
         bpy.data.scenes[bpy.context.scene.name].render.engine = "CYCLES"
 
         self.bake_material = bpy.data.materials.new(name=low + '_bake')
@@ -54,9 +50,10 @@ class BatchBake(bpy.types.Operator):
         bake_node = nodes.new('ShaderNodeTexImage')
         bake_node.select = True
 
-        self.bake_image = bpy.data.images.new(low + '_bake',
-                                              width=512,
-                                              height=512)
+        self.bake_image = bpy.data.images.new(
+            low + '_bake',
+            width=self.context.scene.output_size,
+            height=self.context.scene.output_size)
         bake_node.image = self.bake_image
 
         bpy.data.objects[self.high].select_set(True)
@@ -71,7 +68,7 @@ class BatchBake(bpy.types.Operator):
             self.bake_ao(low)
 
     def clean_up(self, low):
-        bpy.data.objects[low].hide_render = True
+        print()
 
     # TODO dry!
     def bake_diffuse(self, low):
@@ -111,4 +108,5 @@ class BatchBake(bpy.types.Operator):
 
         self.bake_image.filepath_raw = self.context.scene.bake_out_path + low + '_ao.jpg'
         self.bake_image.file_format = 'JPEG'
+        # save as bw image
         self.bake_image.save()
