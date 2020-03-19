@@ -98,6 +98,9 @@ class BatchBake(bpy.types.Operator):
         self.bake_image.save()
 
     def bake_ao(self, low):
+        self.hide_all()
+        self.unhide_one(low)
+        self.unhide_one(self.high)
         bpy.context.scene.cycles.samples = 32
         bpy.context.scene.render.bake.use_pass_direct = False
         bpy.context.scene.render.bake.use_pass_indirect = False
@@ -110,3 +113,17 @@ class BatchBake(bpy.types.Operator):
         self.bake_image.file_format = 'JPEG'
         # save as bw image
         self.bake_image.save()
+        self.unhide_all()
+
+    # TODO implement better solution as soon as this bug is fixed: https://blender.stackexchange.com/questions/169672
+    def hide_all(self):
+        for obj in bpy.data.objects:
+            obj.scale = (0, 0, 0)
+
+    def unhide_all(self):
+        # FIXME save old scales instead of assuming that all object had scale "1"
+        for obj in bpy.data.objects:
+            obj.scale = (1, 1, 1)
+
+    def unhide_one(self, object):
+        bpy.data.objects[object].scale = (1, 1, 1)
