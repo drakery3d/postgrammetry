@@ -63,6 +63,12 @@ def register():
         default=2**10 * 8,
     )
 
+    bpy.types.Scene.ao_samples = bpy.props.IntProperty(
+        name='ao_samples',
+        description='Samples for Ambient Occlusion baking',
+        default=64,
+    )
+
 
 def unregister():
     for cls in classes:

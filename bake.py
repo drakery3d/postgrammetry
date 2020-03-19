@@ -101,7 +101,7 @@ class BatchBake(bpy.types.Operator):
         self.hide_all()
         self.unhide_one(low)
         self.unhide_one(self.high)
-        bpy.context.scene.cycles.samples = 32
+        bpy.context.scene.cycles.samples = self.context.scene.ao_samples
         bpy.context.scene.render.bake.use_pass_direct = False
         bpy.context.scene.render.bake.use_pass_indirect = False
         bpy.context.scene.render.bake.use_pass_color = True

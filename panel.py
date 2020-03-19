@@ -36,12 +36,18 @@ class BatchBakerPanel(bpy.types.Panel):
                                'objects',
                                text='Lowpoly')
 
-        row = layout.row()
-        row.prop(context.scene, 'bake_diffuse', text='Diffuse')
-        row = layout.row()
-        row.prop(context.scene, 'bake_normal', text='Normal')
-        row = layout.row()
-        row.prop(context.scene, 'bake_ao', text='Ambient Occlusion')
+        box = layout.box()
+        col = box.column(align=True)
+        row = col.row(align=True)
+        row.prop(context.scene, "bake_diffuse", icon="BLANK1", text="Diffuse")
+
+        row = col.row(align=True)
+        row.prop(context.scene, "bake_ao", icon="BLANK1", text="AO")
+        if context.scene.bake_ao:
+            row.prop(context.scene, "ao_samples", text="")
+
+        row = col.row(align=True)
+        row.prop(context.scene, "bake_normal", icon="BLANK1", text="Normal")
 
         row = layout.column()
         row.prop(context.scene, 'bake_out_path', text='Output')
