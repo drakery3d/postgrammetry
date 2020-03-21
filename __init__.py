@@ -4,7 +4,7 @@ bl_info = {
     'description':
     'Batch baking from low to high poly to multiple low poly meshes',
     'blender': (2, 80, 0),
-    'version': (0, 3, 0),
+    'version': (0, 4, 0),
     'location': 'View3D',
     'category': 'Generic'
 }

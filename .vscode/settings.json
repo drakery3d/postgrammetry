@@ -1,5 +1,10 @@
 {
   "python.formatting.provider": "yapf",
   "python.pythonPath": "venv/bin/python3",
-  "cSpell.words": ["idname", "Ludewig", "unregister"]
+  "cSpell.words": [
+    "BSDF",
+    "Ludewig",
+    "idname",
+    "unregister"
+  ]
 }

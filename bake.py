@@ -15,6 +15,27 @@ def un_hide(obj_name):
     obj.hide_set(False)
 
 
+def remove_materials(obj_name):
+    print()
+    # TODO remove all materials from obj_name
+    #obj = bpy.data.objects.get(obj_name)
+    #for i in range(len(obj.material_slots.keys())):
+    #    obj.active_material_index = i
+    #    bpy.ops.object.material_slot_remove()
+
+
+def remove_unused_images():
+    for img in bpy.data.images:
+        if not img.users:
+            bpy.data.images.remove(img)
+
+
+def remove_unused_materials():
+    for material in bpy.data.materials:
+        if not material.users:
+            bpy.data.materials.remove(material)
+
+
 class BatchBake(bpy.types.Operator):
     bl_idname = 'bb.bake'
     bl_label = 'batch bake'
@@ -35,6 +56,9 @@ class BatchBake(bpy.types.Operator):
         for obj_name in low_objects_names:
             Bake(high, obj_name)
 
+        remove_unused_images()
+        remove_unused_materials()
+        hide(high)
         end_time = time.time()
         bpy.context.scene.baking_done = True
         bpy.context.scene.baking_time = end_time - start_time
@@ -48,34 +72,36 @@ class Bake():
 
         self.prepare()
         self.bake()
+        self.apply_textures()
         self.clean()
 
     def prepare(self):
         bpy.data.scenes[bpy.context.scene.name].render.engine = 'CYCLES'
         un_hide(self.low)
         un_hide(self.high)
+        low = bpy.data.objects.get(self.low)
 
-        self.bake_material = bpy.data.materials.new(name=self.low +
-                                                    str(uuid.uuid4()))
+        remove_materials(self.low)
+        self.material = bpy.data.materials.new(name=self.low + '_material')
+
         if bpy.data.objects[self.low].data.materials:
-            bpy.data.objects[self.low].data.materials[0] = self.bake_material
+            bpy.data.objects[self.low].data.materials[0] = self.material
         else:
-            bpy.data.objects[self.low].data.materials.append(
-                self.bake_material)
+            bpy.data.objects[self.low].data.materials.append(self.material)
 
-        self.bake_material.use_nodes = True
-        nodes = self.bake_material.node_tree.nodes
-        bake_node = nodes.new('ShaderNodeTexImage')
-        bake_node.select = True
+        self.material.use_nodes = True
+        self.nodes = self.material.node_tree.nodes
+        self.bake_node = self.nodes.new('ShaderNodeTexImage')
+        self.bake_node.select = True
 
         self.bake_image = bpy.data.images.new(
             self.low + str(uuid.uuid4()),
             width=bpy.context.scene.output_size,
             height=bpy.context.scene.output_size)
-        bake_node.image = self.bake_image
+        self.bake_node.image = self.bake_image
 
-        bpy.data.objects[self.high].select_set(True)
-        bpy.context.view_layer.objects.active = bpy.data.objects[self.low]
+        bpy.data.objects.get(self.high).select_set(True)
+        bpy.context.view_layer.objects.active = low
 
     def bake(self):
         if (bpy.context.scene.bake_diffuse):
@@ -85,11 +111,53 @@ class Bake():
         if (bpy.context.scene.bake_ao):
             self.bake_ao()
 
+    def apply_textures(self):
+        if bpy.context.scene.bake_diffuse:
+            self.apply_diffuse_texture()
+        if bpy.context.scene.bake_normal:
+            self.apply_normal_texture()
+
     def clean(self):
         hide(self.low)
         bpy.ops.object.select_all(action='DESELECT')
+        self.nodes.remove(self.bake_node)
         bpy.data.images.remove(self.bake_image)
-        bpy.data.materials.remove(self.bake_material)
+
+    def apply_diffuse_texture(self):
+        bpy.data.images.load(self.diffuse_image_path)
+        diffuse_texture_node = self.nodes.new('ShaderNodeTexImage')
+
+        image_name = self.low + self.diffuse_image_name
+        image = bpy.data.images[image_name]
+        diffuse_texture_node.image = image
+        image.reload()
+
+        diffuse_texture_node.location = (-300, 300)
+        principled = self.nodes.get("Principled BSDF")
+        self.material.node_tree.links.new(
+            diffuse_texture_node.outputs['Color'],
+            principled.inputs['Base Color'])
+
+    def apply_normal_texture(self):
+        bpy.data.images.load(self.normal_image_path)
+        normal_texture_node = self.nodes.new('ShaderNodeTexImage')
+
+        image_name = self.low + self.normal_image_name
+        image = bpy.data.images[image_name]
+        image.colorspace_settings.name = 'Non-Color'
+        normal_texture_node.image = image
+        image.reload()
+
+        normal_texture_node.location = (-500, 0)
+
+        normal_map_node = self.nodes.new('ShaderNodeNormalMap')
+        self.material.node_tree.links.new(normal_texture_node.outputs['Color'],
+                                          normal_map_node.inputs['Color'])
+        normal_map_node.location = (-200, -50)
+
+        principled = self.nodes.get("Principled BSDF")
+        self.material.node_tree.links.new(normal_map_node.outputs['Normal'],
+                                          principled.inputs['Normal'])
 
     def setup_baking_settings(self):
         bpy.context.scene.cycles.samples = 1
@@ -106,7 +174,9 @@ class Bake():
         self.setup_baking_settings()
         bpy.ops.object.bake(type='DIFFUSE')
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_diffuse.tif'
+        self.diffuse_image_name = '_diffuse.tif'
+        self.diffuse_image_path = bpy.context.scene.bake_out_path + self.low + self.diffuse_image_name
+        self.bake_image.filepath_raw = self.diffuse_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
 
@@ -114,7 +184,9 @@ class Bake():
         self.setup_baking_settings()
         bpy.ops.object.bake(type='NORMAL')
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_normal.tif'
+        self.normal_image_name = '_normal.tif'
+        self.normal_image_path = bpy.context.scene.bake_out_path + self.low + self.normal_image_name
+        self.bake_image.filepath_raw = self.normal_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
 
@@ -122,7 +194,8 @@ class Bake():
         bpy.context.scene.cycles.samples = bpy.context.scene.ao_samples
         bpy.ops.object.bake(type='AO')
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_ao.tif'
+        self.ao_image_name = '_ao.tif'
+        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + self.ao_image_name
         self.bake_image.file_format = bpy.context.scene.output_format
         # TODO save as bw image
         self.bake_image.save()
