@@ -4,7 +4,7 @@ bl_info = {
     'description':
     'Batch baking from low to high poly to multiple low poly meshes',
     'blender': (2, 80, 0),
-    'version': (0, 2, 0),
+    'version': (0, 3, 0),
     'location': 'View3D',
     'category': 'Generic'
 }
@@ -25,13 +25,10 @@ def register():
     bpy.types.Scene.highpoly_bake_obj = bpy.props.StringProperty(
         name='highpoly_bake_obj',
         description='The object you want to bake from')
+
     bpy.types.Scene.lowpoly_bake_obj = bpy.props.StringProperty(
         name='lowpoly_bake_obj',
         description='The object you want to bake onto')
-    bpy.types.Scene.bake_multiple = bpy.props.BoolProperty(
-        name='bake_multiple',
-        description='Check if you want to bake onto multiple lowpoly meshes',
-        default=True)
 
     bpy.types.Scene.bake_diffuse = bpy.props.BoolProperty(
         name='bake_diffuse',
@@ -73,6 +70,13 @@ def register():
     bpy.types.Scene.baking_time = bpy.props.IntProperty(name='baking_time',
                                                         default=-1)
 
+    bpy.types.Scene.use_cages = bpy.props.BoolProperty(
+        name='use_cages',
+        description='Check if you want to bake from cages)',
+        default=True)
+    bpy.types.Scene.ray_distance = bpy.props.IntProperty(name='ray_distance',
+                                                         default=0)
+
 
 def unregister():
     for cls in classes:
@@ -88,6 +92,8 @@ def unregister():
     del bpy.types.Scene.output_format
     del bpy.types.Scene.baking_done
     del bpy.types.Scene.baking_time
+    del bpy.types.Scene.use_cages
+    del bpy.types.Scene.ray_distance
 
 
 if __name__ == '__main__':

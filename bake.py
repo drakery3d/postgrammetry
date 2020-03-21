@@ -9,6 +9,12 @@ class BatchBake(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
+        def my_handler(scene):
+            print("post render")
+
+        bpy.app.handlers.render_complete.append(my_handler)
+        bpy.app.handlers.render_post.append(my_handler)
+
         start_time = time.time()
         bpy.context.scene.baking_done = False
 
@@ -18,13 +24,10 @@ class BatchBake(bpy.types.Operator):
             obj.hide_render = True
             obj.hide_viewport = False
 
-        if (context.scene.bake_multiple):
-            low_objects = bpy.data.collections[
-                context.scene.lowpoly_bake_obj].all_objects[:]
-            for obj in low_objects:
-                Bake(high, obj.name)
-        else:
-            Bake(high, context.scene.lowpoly_bake_obj)
+        low_objects = bpy.data.collections[
+            context.scene.lowpoly_bake_obj].all_objects[:]
+        for obj in low_objects:
+            Bake(high, obj.name)
 
         end_time = time.time()
         bpy.context.scene.baking_done = True
@@ -90,12 +93,15 @@ class Bake():
         bpy.context.scene.render.bake.use_pass_direct = False
         bpy.context.scene.render.bake.use_pass_indirect = False
         bpy.context.scene.render.bake.use_pass_color = True
+        bpy.context.scene.render.bake.use_selected_to_active = True
+        bpy.context.scene.render.bake.use_cage = bpy.context.scene.use_cages
+        if bpy.context.scene.use_cages:
+            bpy.context.scene.render.bake.cage_object = bpy.data.objects[
+                self.low + '_cage']
 
     def bake_diffuse(self):
         self.setup_baking_settings()
-        bpy.ops.object.bake(type='DIFFUSE',
-                            use_clear=True,
-                            use_selected_to_active=True)
+        bpy.ops.object.bake(type='DIFFUSE')
 
         self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_diffuse.tif'
         self.bake_image.file_format = bpy.context.scene.output_format
@@ -103,9 +109,7 @@ class Bake():
 
     def bake_normal(self):
         self.setup_baking_settings()
-        bpy.ops.object.bake(type='NORMAL',
-                            use_clear=True,
-                            use_selected_to_active=True)
+        bpy.ops.object.bake(type='NORMAL')
 
         self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_normal.tif'
         self.bake_image.file_format = bpy.context.scene.output_format
@@ -113,9 +117,7 @@ class Bake():
 
     def bake_ao(self):
         bpy.context.scene.cycles.samples = bpy.context.scene.ao_samples
-        bpy.ops.object.bake(type='AO',
-                            use_clear=True,
-                            use_selected_to_active=True)
+        bpy.ops.object.bake(type='AO')
 
         self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_ao.tif'
         self.bake_image.file_format = bpy.context.scene.output_format
@@ -126,10 +128,16 @@ class Bake():
         self.original_samples = bpy.context.scene.cycles.samples
         self.original_render_engine = bpy.data.scenes[
             bpy.context.scene.name].render.engine
-        self.original_material = bpy.data.objects[self.low].data.materials[0]
+        if len(bpy.data.objects[self.low].data.materials):
+            self.original_material = bpy.data.objects[
+                self.low].data.materials[0]
+        else:
+            self.original_material = None
 
     def revert_original_settings(self):
         bpy.data.scenes[
             bpy.context.scene.name].render.engine = self.original_render_engine
-        bpy.data.objects[self.low].data.materials[0] = self.original_material
+        if self.original_material:
+            bpy.data.objects[
+                self.low].data.materials[0] = self.original_material
         bpy.context.scene.cycles.samples = self.original_samples

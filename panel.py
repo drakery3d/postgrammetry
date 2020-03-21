@@ -19,22 +19,17 @@ class BatchBakerPanel(bpy.types.Panel):
                            text='Highpoly')
 
         row = layout.row()
-        row.prop(context.scene,
-                 'bake_multiple',
-                 text='Bake onto multiple meshes')
+        layout.prop_search(context.scene,
+                           'lowpoly_bake_obj',
+                           bpy.data,
+                           'collections',
+                           text='Lowpolys')
+
         row = layout.row()
-        if (context.scene.bake_multiple):
-            layout.prop_search(context.scene,
-                               'lowpoly_bake_obj',
-                               bpy.data,
-                               'collections',
-                               text='Lowpolys')
-        else:
-            layout.prop_search(context.scene,
-                               'lowpoly_bake_obj',
-                               context.scene,
-                               'objects',
-                               text='Lowpoly')
+        row.prop(context.scene, 'use_cages', text='Use Cages')
+        if context.scene.use_cages:
+            row = layout.row()
+            row.label(text='Name cages like: lod0_cage')
 
         box = layout.box()
         col = box.column(align=True)
