@@ -3,31 +3,37 @@ import uuid
 import time
 
 
+def hide(obj_name):
+    obj = bpy.data.objects.get(obj_name)
+    obj.hide_render = True
+    obj.hide_set(True)
+
+
+def un_hide(obj_name):
+    obj = bpy.data.objects.get(obj_name)
+    obj.hide_render = False
+    obj.hide_set(False)
+
+
 class BatchBake(bpy.types.Operator):
     bl_idname = 'bb.bake'
     bl_label = 'batch bake'
     bl_options = {'UNDO'}
 
     def execute(self, context):
-        def my_handler(scene):
-            print("post render")
-
-        bpy.app.handlers.render_complete.append(my_handler)
-        bpy.app.handlers.render_post.append(my_handler)
-
         start_time = time.time()
         bpy.context.scene.baking_done = False
-
         high = context.scene.highpoly_bake_obj
 
-        for obj in bpy.data.objects:
-            obj.hide_render = True
-            obj.hide_viewport = False
+        for obj_name in [obj.name for obj in bpy.data.objects]:
+            hide(obj_name)
 
-        low_objects = bpy.data.collections[
-            context.scene.lowpoly_bake_obj].all_objects[:]
-        for obj in low_objects:
-            Bake(high, obj.name)
+        low_objects_names = [
+            obj.name for obj in bpy.data.collections[
+                context.scene.lowpoly_bake_obj].all_objects
+        ]
+        for obj_name in low_objects_names:
+            Bake(high, obj_name)
 
         end_time = time.time()
         bpy.context.scene.baking_done = True
@@ -45,11 +51,9 @@ class Bake():
         self.clean()
 
     def prepare(self):
-        self.remember_original_settings()
-
         bpy.data.scenes[bpy.context.scene.name].render.engine = 'CYCLES'
-        bpy.data.objects[self.low].hide_render = False
-        bpy.data.objects[self.high].hide_render = False
+        un_hide(self.low)
+        un_hide(self.high)
 
         self.bake_material = bpy.data.materials.new(name=self.low +
                                                     str(uuid.uuid4()))
@@ -82,11 +86,10 @@ class Bake():
             self.bake_ao()
 
     def clean(self):
-        bpy.data.objects[self.low].hide_render = True
+        hide(self.low)
         bpy.ops.object.select_all(action='DESELECT')
         bpy.data.images.remove(self.bake_image)
         bpy.data.materials.remove(self.bake_material)
-        self.revert_original_settings()
 
     def setup_baking_settings(self):
         bpy.context.scene.cycles.samples = 1
@@ -123,21 +126,3 @@ class Bake():
         self.bake_image.file_format = bpy.context.scene.output_format
         # TODO save as bw image
         self.bake_image.save()
-
-    def remember_original_settings(self):
-        self.original_samples = bpy.context.scene.cycles.samples
-        self.original_render_engine = bpy.data.scenes[
-            bpy.context.scene.name].render.engine
-        if len(bpy.data.objects[self.low].data.materials):
-            self.original_material = bpy.data.objects[
-                self.low].data.materials[0]
-        else:
-            self.original_material = None
-
-    def revert_original_settings(self):
-        bpy.data.scenes[
-            bpy.context.scene.name].render.engine = self.original_render_engine
-        if self.original_material:
-            bpy.data.objects[
-                self.low].data.materials[0] = self.original_material
-        bpy.context.scene.cycles.samples = self.original_samples
