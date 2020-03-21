@@ -55,3 +55,7 @@ class BatchBakerPanel(bpy.types.Panel):
 
         row = layout.row()
         op = row.operator('bb.bake', text='Bake')
+
+        if bpy.context.scene.baking_done:
+            row = layout.row()
+            row.label(text=f'Last bake took {bpy.context.scene.baking_time}s')

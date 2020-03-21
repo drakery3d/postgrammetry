@@ -31,24 +31,20 @@ def register():
     bpy.types.Scene.bake_multiple = bpy.props.BoolProperty(
         name='bake_multiple',
         description='Check if you want to bake onto multiple lowpoly meshes',
-        default=True,
-    )
+        default=True)
 
     bpy.types.Scene.bake_diffuse = bpy.props.BoolProperty(
         name='bake_diffuse',
         description='Check if you want to bake a diffuse map',
-        default=True,
-    )
+        default=True)
     bpy.types.Scene.bake_normal = bpy.props.BoolProperty(
         name='bake_normal',
         description='Check if you want to bake a normal map',
-        default=True,
-    )
+        default=True)
     bpy.types.Scene.bake_ao = bpy.props.BoolProperty(
         name='bake_ao',
         description='Check if you want to bake an ambient occlusion map',
-        default=True,
-    )
+        default=True)
 
     bpy.types.Scene.bake_out_path = bpy.props.StringProperty(
         name="bake_out_path",
@@ -60,14 +56,22 @@ def register():
         name='output_size',
         subtype="PIXEL",
         description='Output size of texture maps in pixels',
-        default=2**10 * 8,
-    )
+        default=2**10 * 8)
 
     bpy.types.Scene.ao_samples = bpy.props.IntProperty(
         name='ao_samples',
         description='Samples for Ambient Occlusion baking',
-        default=64,
-    )
+        default=64)
+
+    bpy.types.Scene.output_format = bpy.props.StringProperty(
+        name="output_format",
+        default='TIFF',
+        description="Format the textures will be saved as")
+
+    bpy.types.Scene.baking_done = bpy.props.BoolProperty(name='baking_done',
+                                                         default=False)
+    bpy.types.Scene.baking_time = bpy.props.IntProperty(name='baking_time',
+                                                        default=-1)
 
 
 def unregister():
@@ -81,6 +85,9 @@ def unregister():
     del bpy.types.Scene.bake_ao
     del bpy.types.Scene.bake_out_path
     del bpy.types.Scene.output_size
+    del bpy.types.Scene.output_format
+    del bpy.types.Scene.baking_done
+    del bpy.types.Scene.baking_time
 
 
 if __name__ == '__main__':

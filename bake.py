@@ -1,5 +1,6 @@
 import bpy
 import uuid
+import time
 
 
 class BatchBake(bpy.types.Operator):
@@ -8,6 +9,9 @@ class BatchBake(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
+        start_time = time.time()
+        bpy.context.scene.baking_done = False
+
         high = context.scene.highpoly_bake_obj
 
         for obj in bpy.data.objects:
@@ -22,6 +26,9 @@ class BatchBake(bpy.types.Operator):
         else:
             Bake(high, context.scene.lowpoly_bake_obj)
 
+        end_time = time.time()
+        bpy.context.scene.baking_done = True
+        bpy.context.scene.baking_time = end_time - start_time
         return {'FINISHED'}
 
 
@@ -90,8 +97,8 @@ class Bake():
                             use_clear=True,
                             use_selected_to_active=True)
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_diffuse.jpg'
-        self.bake_image.file_format = 'JPEG'
+        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_diffuse.tif'
+        self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
 
     def bake_normal(self):
@@ -100,8 +107,8 @@ class Bake():
                             use_clear=True,
                             use_selected_to_active=True)
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_normal.jpg'
-        self.bake_image.file_format = 'JPEG'
+        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_normal.tif'
+        self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
 
     def bake_ao(self):
@@ -110,8 +117,8 @@ class Bake():
                             use_clear=True,
                             use_selected_to_active=True)
 
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_ao.jpg'
-        self.bake_image.file_format = 'JPEG'
+        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + '_ao.tif'
+        self.bake_image.file_format = bpy.context.scene.output_format
         # TODO save as bw image
         self.bake_image.save()
 
