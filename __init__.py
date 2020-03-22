@@ -75,8 +75,12 @@ def register():
         name='use_cages',
         description='Check if you want to bake from cages)',
         default=True)
-    bpy.types.Scene.ray_distance = bpy.props.IntProperty(name='ray_distance',
-                                                         default=0)
+
+    bpy.types.Scene.ray_distance = bpy.props.FloatProperty(name='ray_distance',
+                                                           default=0,
+                                                           subtype='DISTANCE')
+    bpy.types.Scene.cage_extrusion = bpy.props.FloatProperty(
+        name='cage_extrusion', default=0, subtype='DISTANCE')
 
 
 def unregister():
@@ -95,6 +99,7 @@ def unregister():
     del bpy.types.Scene.baking_time
     del bpy.types.Scene.use_cages
     del bpy.types.Scene.ray_distance
+    del bpy.types.Scene.cage_extrusion
 
 
 if __name__ == '__main__':

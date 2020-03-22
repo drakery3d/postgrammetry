@@ -32,6 +32,15 @@ class BB_PT_Main(bpy.types.Panel):
             row.label(text='Name cages like: lod0_cage')
 
         row = layout.row()
+        if context.scene.use_cages:
+            row.prop(context.scene, 'cage_extrusion', text='Cage Extrusion')
+        else:
+            row.prop(context.scene, 'ray_distance', text='Ray Distacne')
+
+        row = layout.row()
+        row.prop(bpy.context.scene.render.bake, 'margin')
+
+        row = layout.row()
         row.operator('bb.generate_cages', text='Generate cage meshes')
 
         box = layout.box()

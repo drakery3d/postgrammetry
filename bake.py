@@ -138,6 +138,10 @@ class Bake():
         if bpy.context.scene.use_cages:
             bpy.context.scene.render.bake.cage_object = bpy.data.objects[
                 self.low + '_cage']
+        if bpy.context.scene.use_cages:
+            bpy.context.scene.render.bake.cage_extrusion = bpy.context.scene.cage_extrusion
+        else:
+            bpy.context.scene.render.bake.cage_extrusion = bpy.context.scene.ray_distance
 
     def bake_diffuse(self):
         self.setup_baking_settings()
