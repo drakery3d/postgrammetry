@@ -15,13 +15,9 @@ def un_hide(obj_name):
     obj.hide_set(False)
 
 
-def remove_materials(obj_name):
-    print()
-    # TODO remove all materials from obj_name
-    #obj = bpy.data.objects.get(obj_name)
-    #for i in range(len(obj.material_slots.keys())):
-    #    obj.active_material_index = i
-    #    bpy.ops.object.material_slot_remove()
+def remove_all_materials_from(obj_name):
+    obj = bpy.data.objects.get(obj_name)
+    obj.data.materials.clear()
 
 
 def remove_unused_images():
@@ -36,7 +32,7 @@ def remove_unused_materials():
             bpy.data.materials.remove(material)
 
 
-class BatchBake(bpy.types.Operator):
+class BB_OT_BatchBake(bpy.types.Operator):
     bl_idname = 'bb.bake'
     bl_label = 'batch bake'
     bl_options = {'UNDO'}
@@ -81,7 +77,7 @@ class Bake():
         un_hide(self.high)
         low = bpy.data.objects.get(self.low)
 
-        remove_materials(self.low)
+        remove_all_materials_from(self.low)
         self.material = bpy.data.materials.new(name=self.low + '_material')
 
         if bpy.data.objects[self.low].data.materials:
@@ -197,5 +193,4 @@ class Bake():
         self.ao_image_name = '_ao.tif'
         self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + self.ao_image_name
         self.bake_image.file_format = bpy.context.scene.output_format
-        # TODO save as bw image
         self.bake_image.save()

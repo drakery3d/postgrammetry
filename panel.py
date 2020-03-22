@@ -1,9 +1,9 @@
 import bpy
 
 
-class BatchBakerPanel(bpy.types.Panel):
+class BB_PT_Main(bpy.types.Panel):
     bl_label = 'Batch Baking'
-    bl_idname = 'batch_baker'
+    bl_idname = 'MAIN_PT_batch_baker'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = 'Bake'

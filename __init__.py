@@ -6,16 +6,16 @@ bl_info = {
     'blender': (2, 80, 0),
     'version': (0, 4, 0),
     'location': 'View3D',
-    'category': 'Generic'
+    'category': 'Automation'
 }
 
 import bpy
 import os
 
-from .panel import BatchBakerPanel
-from .bake import BatchBake
+from .panel import BB_PT_Main
+from .bake import BB_OT_BatchBake
 
-classes = (BatchBake, BatchBakerPanel)
+classes = (BB_OT_BatchBake, BB_PT_Main)
 
 
 def register():
