@@ -14,8 +14,9 @@ import os
 
 from .panel import BB_PT_Main
 from .bake import BB_OT_BatchBake
+from .generate_cages import BB_OT_GenerateCages
 
-classes = (BB_OT_BatchBake, BB_PT_Main)
+classes = (BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages)
 
 
 def register():

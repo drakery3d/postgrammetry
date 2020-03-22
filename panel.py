@@ -31,6 +31,9 @@ class BB_PT_Main(bpy.types.Panel):
             row = layout.row()
             row.label(text='Name cages like: lod0_cage')
 
+        row = layout.row()
+        row.operator('bb.generate_cages', text='Generate cage meshes')
+
         box = layout.box()
         col = box.column(align=True)
         row = col.row(align=True)
@@ -49,7 +52,7 @@ class BB_PT_Main(bpy.types.Panel):
         row.prop(context.scene, 'output_size', text='Output size')
 
         row = layout.row()
-        op = row.operator('bb.bake', text='Bake')
+        row.operator('bb.bake', text='Bake')
 
         if bpy.context.scene.baking_done:
             row = layout.row()
