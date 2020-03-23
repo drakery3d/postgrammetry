@@ -15,6 +15,9 @@ class BB_OT_BatchBake(bpy.types.Operator):
         bpy.context.scene.baking_done = False
         high = context.scene.highpoly_bake_obj
 
+        remove_unused_images()
+        remove_unused_materials()
+
         for obj_name in [obj.name for obj in bpy.data.objects]:
             hide(obj_name)
 
@@ -77,10 +80,10 @@ class Bake():
         if bpy.context.scene.bake_size_16k:
             self.output_sizes.append(2**14)
 
-        max_output_size = max(self.output_sizes)
+        self.max_output_size = max(self.output_sizes)
         self.bake_image = bpy.data.images.new(self.low + str(uuid.uuid4()),
-                                              width=max_output_size,
-                                              height=max_output_size)
+                                              width=self.max_output_size,
+                                              height=self.max_output_size)
         self.bake_node.image = self.bake_image
 
         bpy.data.objects.get(self.high).select_set(True)
@@ -110,8 +113,7 @@ class Bake():
         bpy.data.images.load(self.diffuse_image_path)
         diffuse_texture_node = self.nodes.new('ShaderNodeTexImage')
 
-        image_name = self.low + self.diffuse_image_name
-        image = bpy.data.images[image_name]
+        image = bpy.data.images[self.diffuse_image_name]
         diffuse_texture_node.image = image
         image.reload()
 
@@ -159,13 +161,19 @@ class Bake():
 
     def bake_diffuse(self):
         self.setup_baking_settings()
-        bpy.ops.object.bake(type='DIFFUSE')
 
-        self.diffuse_image_name = '_diffuse.tif'
-        self.diffuse_image_path = bpy.context.scene.bake_out_path + self.low + self.diffuse_image_name
+        TYPE = 'DIFFUSE'
+        bake_type = TYPE.lower()
+        file_format_extension = 'tif'
+
+        bpy.ops.object.bake(type=TYPE)
+        self.diffuse_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
+        self.diffuse_image_path = f'{bpy.context.scene.bake_out_path}{self.diffuse_image_name}'
         self.bake_image.filepath_raw = self.diffuse_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
+
+        self.resize_image(bake_type)
 
     def bake_normal(self):
         self.setup_baking_settings()
@@ -185,3 +193,34 @@ class Bake():
         self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + self.ao_image_name
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
+
+    def resize_image(self, type):
+        resizes = self.output_sizes
+        resizes.remove(max(self.output_sizes))
+        if len(resizes) >= 1:
+            master_copy = bpy.data.images.get(self.bake_image.name).copy()
+            master_copy.name = f'{self.low}_{type}_copy.tif'
+
+            for size in resizes:
+                resized = bpy.data.images.get(master_copy.name).copy()
+                resized.scale(size, size)
+                size_abbreviation = self.get_size_abbreviation(size)
+                resized.filepath_raw = f'{bpy.context.scene.bake_out_path}{self.low}_{type}_{size_abbreviation}.tif'
+                resized.save()
+        # TODO delete copied images
+
+    def get_size_abbreviation(self, size_in_pixels):
+        if size_in_pixels == 2**9:
+            return '512px'
+        if size_in_pixels == 2**10:
+            return '1k'
+        if size_in_pixels == 2**11:
+            return '2k'
+        if size_in_pixels == 2**12:
+            return '4k'
+        if size_in_pixels == 2**13:
+            return '8k'
+        if size_in_pixels == 2**14:
+            return '16k'
+        else:
+            return ''
