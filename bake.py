@@ -127,8 +127,7 @@ class Bake():
         bpy.data.images.load(self.normal_image_path)
         normal_texture_node = self.nodes.new('ShaderNodeTexImage')
 
-        image_name = self.low + self.normal_image_name
-        image = bpy.data.images[image_name]
+        image = bpy.data.images[self.normal_image_name]
         image.colorspace_settings.name = 'Non-Color'
         normal_texture_node.image = image
         image.reload()
@@ -167,6 +166,7 @@ class Bake():
         file_format_extension = 'tif'
 
         bpy.ops.object.bake(type=TYPE)
+
         self.diffuse_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
         self.diffuse_image_path = f'{bpy.context.scene.bake_out_path}{self.diffuse_image_name}'
         self.bake_image.filepath_raw = self.diffuse_image_path
@@ -177,13 +177,20 @@ class Bake():
 
     def bake_normal(self):
         self.setup_baking_settings()
-        bpy.ops.object.bake(type='NORMAL')
 
-        self.normal_image_name = '_normal.tif'
-        self.normal_image_path = bpy.context.scene.bake_out_path + self.low + self.normal_image_name
+        TYPE = 'NORMAL'
+        bake_type = TYPE.lower()
+        file_format_extension = 'tif'
+
+        bpy.ops.object.bake(type=TYPE)
+
+        self.normal_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
+        self.normal_image_path = f'{bpy.context.scene.bake_out_path}{self.normal_image_name}'
         self.bake_image.filepath_raw = self.normal_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
+
+        self.resize_image(bake_type)
 
     def bake_ao(self):
         bpy.context.scene.cycles.samples = bpy.context.scene.ao_samples
@@ -195,9 +202,10 @@ class Bake():
         self.bake_image.save()
 
     def resize_image(self, type):
-        resizes = self.output_sizes
+        resizes = self.output_sizes.copy()
         resizes.remove(max(self.output_sizes))
         if len(resizes) >= 1:
+            # TODO don't get image from self.bake_image, but rather from type?!
             master_copy = bpy.data.images.get(self.bake_image.name).copy()
             master_copy.name = f'{self.low}_{type}_copy.tif'
 
