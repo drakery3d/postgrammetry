@@ -50,12 +50,6 @@ def register():
         description="The folder your maps will be saved to",
         subtype='DIR_PATH')
 
-    bpy.types.Scene.output_size = bpy.props.IntProperty(
-        name='output_size',
-        subtype="PIXEL",
-        description='Output size of texture maps in pixels',
-        default=2**10 * 8)
-
     bpy.types.Scene.ao_samples = bpy.props.IntProperty(
         name='ao_samples',
         description='Samples for Ambient Occlusion baking',
@@ -82,6 +76,19 @@ def register():
     bpy.types.Scene.cage_extrusion = bpy.props.FloatProperty(
         name='cage_extrusion', default=0, subtype='DISTANCE')
 
+    bpy.types.Scene.bake_size_512px = bpy.props.BoolProperty(
+        name='bake_size_512px', default=False)
+    bpy.types.Scene.bake_size_1k = bpy.props.BoolProperty(name='bake_size_1k',
+                                                          default=False)
+    bpy.types.Scene.bake_size_2k = bpy.props.BoolProperty(name='bake_size_2k',
+                                                          default=True)
+    bpy.types.Scene.bake_size_4k = bpy.props.BoolProperty(name='bake_size_4k',
+                                                          default=True)
+    bpy.types.Scene.bake_size_8k = bpy.props.BoolProperty(name='bake_size_8k',
+                                                          default=True)
+    bpy.types.Scene.bake_size_16k = bpy.props.BoolProperty(
+        name='bake_size_16k', default=False)
+
 
 def unregister():
     for cls in classes:
@@ -93,13 +100,18 @@ def unregister():
     del bpy.types.Scene.bake_normal
     del bpy.types.Scene.bake_ao
     del bpy.types.Scene.bake_out_path
-    del bpy.types.Scene.output_size
     del bpy.types.Scene.output_format
     del bpy.types.Scene.baking_done
     del bpy.types.Scene.baking_time
     del bpy.types.Scene.use_cages
     del bpy.types.Scene.ray_distance
     del bpy.types.Scene.cage_extrusion
+    del bpy.types.Scene.bake_size_512px
+    del bpy.types.Scene.bake_size_1k
+    del bpy.types.Scene.bake_size_2k
+    del bpy.types.Scene.bake_size_4k
+    del bpy.types.Scene.bake_size_8k
+    del bpy.types.Scene.bake_size_16k
 
 
 if __name__ == '__main__':

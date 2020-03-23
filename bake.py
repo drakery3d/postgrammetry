@@ -63,10 +63,24 @@ class Bake():
         self.bake_node = self.nodes.new('ShaderNodeTexImage')
         self.bake_node.select = True
 
-        self.bake_image = bpy.data.images.new(
-            self.low + str(uuid.uuid4()),
-            width=bpy.context.scene.output_size,
-            height=bpy.context.scene.output_size)
+        self.output_sizes = []
+        if bpy.context.scene.bake_size_512px:
+            self.output_sizes.append(2**9)
+        if bpy.context.scene.bake_size_1k:
+            self.output_sizes.append(2**10)
+        if bpy.context.scene.bake_size_2k:
+            self.output_sizes.append(2**11)
+        if bpy.context.scene.bake_size_4k:
+            self.output_sizes.append(2**12)
+        if bpy.context.scene.bake_size_8k:
+            self.output_sizes.append(2**13)
+        if bpy.context.scene.bake_size_16k:
+            self.output_sizes.append(2**14)
+
+        max_output_size = max(self.output_sizes)
+        self.bake_image = bpy.data.images.new(self.low + str(uuid.uuid4()),
+                                              width=max_output_size,
+                                              height=max_output_size)
         self.bake_node.image = self.bake_image
 
         bpy.data.objects.get(self.high).select_set(True)
