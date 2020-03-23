@@ -193,13 +193,22 @@ class Bake():
         self.resize_image(bake_type)
 
     def bake_ao(self):
+        self.setup_baking_settings()
         bpy.context.scene.cycles.samples = bpy.context.scene.ao_samples
-        bpy.ops.object.bake(type='AO')
 
-        self.ao_image_name = '_ao.tif'
-        self.bake_image.filepath_raw = bpy.context.scene.bake_out_path + self.low + self.ao_image_name
+        TYPE = 'AO'
+        bake_type = TYPE.lower()
+        file_format_extension = 'tif'
+
+        bpy.ops.object.bake(type=TYPE)
+
+        self.ao_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
+        self.ao_image_path = f'{bpy.context.scene.bake_out_path}{self.ao_image_name}'
+        self.bake_image.filepath_raw = self.ao_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
+
+        self.resize_image(bake_type)
 
     def resize_image(self, type):
         resizes = self.output_sizes.copy()
