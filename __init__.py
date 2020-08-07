@@ -76,14 +76,10 @@ def register():
     bpy.types.Scene.cage_extrusion = bpy.props.FloatProperty(
         name='cage_extrusion', default=0, subtype='DISTANCE')
 
-    bpy.types.Scene.bake_size_512px = bpy.props.BoolProperty(
-        name='bake_size_512px', default=False)
-    bpy.types.Scene.bake_size_1k = bpy.props.BoolProperty(name='bake_size_1k',
-                                                          default=False)
     bpy.types.Scene.bake_size_2k = bpy.props.BoolProperty(name='bake_size_2k',
-                                                          default=True)
+                                                          default=False)
     bpy.types.Scene.bake_size_4k = bpy.props.BoolProperty(name='bake_size_4k',
-                                                          default=True)
+                                                          default=False)
     bpy.types.Scene.bake_size_8k = bpy.props.BoolProperty(name='bake_size_8k',
                                                           default=True)
     bpy.types.Scene.bake_size_16k = bpy.props.BoolProperty(
@@ -106,8 +102,6 @@ def unregister():
     del bpy.types.Scene.use_cages
     del bpy.types.Scene.ray_distance
     del bpy.types.Scene.cage_extrusion
-    del bpy.types.Scene.bake_size_512px
-    del bpy.types.Scene.bake_size_1k
     del bpy.types.Scene.bake_size_2k
     del bpy.types.Scene.bake_size_4k
     del bpy.types.Scene.bake_size_8k

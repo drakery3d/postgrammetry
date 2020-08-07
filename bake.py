@@ -67,10 +67,6 @@ class Bake():
         self.bake_node.select = True
 
         self.output_sizes = []
-        if bpy.context.scene.bake_size_512px:
-            self.output_sizes.append(2**9)
-        if bpy.context.scene.bake_size_1k:
-            self.output_sizes.append(2**10)
         if bpy.context.scene.bake_size_2k:
             self.output_sizes.append(2**11)
         if bpy.context.scene.bake_size_4k:
@@ -104,7 +100,7 @@ class Bake():
             self.apply_normal_texture()
 
     def clean(self):
-        hide(self.low)
+        un_hide(self.low)
         bpy.ops.object.select_all(action='DESELECT')
         self.nodes.remove(self.bake_node)
         bpy.data.images.remove(self.bake_image)
@@ -161,7 +157,7 @@ class Bake():
     def bake_albedo(self):
         self.setup_baking_settings()
 
-        TYPE = 'ALBEDO'
+        TYPE = 'DIFFUSE'
         bake_type = TYPE.lower()
         file_format_extension = 'tif'
 
