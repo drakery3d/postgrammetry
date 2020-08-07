@@ -43,7 +43,7 @@ class BB_PT_Main(bpy.types.Panel):
         box = layout.box()
         col = box.column(align=True)
         row = col.row(align=True)
-        row.prop(context.scene, "bake_diffuse", icon="BLANK1", text="Diffuse")
+        row.prop(context.scene, "bake_albedo", icon="BLANK1", text="Albedo")
         row = col.row(align=True)
         row.prop(context.scene, "bake_ao", icon="BLANK1", text="AO")
         if context.scene.bake_ao:

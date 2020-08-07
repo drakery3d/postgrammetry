@@ -90,16 +90,16 @@ class Bake():
         bpy.context.view_layer.objects.active = low
 
     def bake(self):
-        if (bpy.context.scene.bake_diffuse):
-            self.bake_diffuse()
+        if (bpy.context.scene.bake_albedo):
+            self.bake_albedo()
         if (bpy.context.scene.bake_normal):
             self.bake_normal()
         if (bpy.context.scene.bake_ao):
             self.bake_ao()
 
     def apply_textures(self):
-        if bpy.context.scene.bake_diffuse:
-            self.apply_diffuse_texture()
+        if bpy.context.scene.bake_albedo:
+            self.apply_albedo_texture()
         if bpy.context.scene.bake_normal:
             self.apply_normal_texture()
 
@@ -109,18 +109,18 @@ class Bake():
         self.nodes.remove(self.bake_node)
         bpy.data.images.remove(self.bake_image)
 
-    def apply_diffuse_texture(self):
-        bpy.data.images.load(self.diffuse_image_path)
-        diffuse_texture_node = self.nodes.new('ShaderNodeTexImage')
+    def apply_albedo_texture(self):
+        bpy.data.images.load(self.albedo_image_path)
+        albedo_texture_node = self.nodes.new('ShaderNodeTexImage')
 
-        image = bpy.data.images[self.diffuse_image_name]
-        diffuse_texture_node.image = image
+        image = bpy.data.images[self.albedo_image_name]
+        albedo_texture_node.image = image
         image.reload()
 
-        diffuse_texture_node.location = (-300, 300)
+        albedo_texture_node.location = (-300, 300)
         principled = self.nodes.get("Principled BSDF")
         self.material.node_tree.links.new(
-            diffuse_texture_node.outputs['Color'],
+            albedo_texture_node.outputs['Color'],
             principled.inputs['Base Color'])
 
     def apply_normal_texture(self):
@@ -158,18 +158,18 @@ class Bake():
         else:
             bpy.context.scene.render.bake.cage_extrusion = bpy.context.scene.ray_distance
 
-    def bake_diffuse(self):
+    def bake_albedo(self):
         self.setup_baking_settings()
 
-        TYPE = 'DIFFUSE'
+        TYPE = 'ALBEDO'
         bake_type = TYPE.lower()
         file_format_extension = 'tif'
 
         bpy.ops.object.bake(type=TYPE)
 
-        self.diffuse_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
-        self.diffuse_image_path = f'{bpy.context.scene.bake_out_path}{self.diffuse_image_name}'
-        self.bake_image.filepath_raw = self.diffuse_image_path
+        self.albedo_image_name = f'{self.low}_{bake_type}_{self.get_size_abbreviation(self.max_output_size)}.{file_format_extension}'
+        self.albedo_image_path = f'{bpy.context.scene.bake_out_path}{self.albedo_image_name}'
+        self.bake_image.filepath_raw = self.albedo_image_path
         self.bake_image.file_format = bpy.context.scene.output_format
         self.bake_image.save()
 

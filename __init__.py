@@ -4,7 +4,7 @@ bl_info = {
     'description':
     'Batch baking from low to high poly to multiple low poly meshes',
     'blender': (2, 80, 0),
-    'version': (0, 4, 0),
+    'version': (0, 4, 1),
     'location': 'View3D',
     'category': 'Automation'
 }
@@ -31,9 +31,9 @@ def register():
         name='lowpoly_bake_obj',
         description='The object you want to bake onto')
 
-    bpy.types.Scene.bake_diffuse = bpy.props.BoolProperty(
-        name='bake_diffuse',
-        description='Check if you want to bake a diffuse map',
+    bpy.types.Scene.bake_albedo = bpy.props.BoolProperty(
+        name='bake_albedo',
+        description='Check if you want to bake a albedo map',
         default=True)
     bpy.types.Scene.bake_normal = bpy.props.BoolProperty(
         name='bake_normal',
@@ -96,7 +96,7 @@ def unregister():
 
     del bpy.types.Scene.highpoly_bake_obj
     del bpy.types.Scene.lowpoly_bake_obj
-    del bpy.types.Scene.bake_diffuse
+    del bpy.types.Scene.bake_albedo
     del bpy.types.Scene.bake_normal
     del bpy.types.Scene.bake_ao
     del bpy.types.Scene.bake_out_path
