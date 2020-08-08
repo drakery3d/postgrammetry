@@ -1,14 +1,23 @@
-# ⚠️ This addon is still in development
+# ⚠️ Postgrammetry is still in development
 
-# Installation
+This addon will help you to automate the entire cleanup process for a photo-scanned 3d model:
 
-1. Download this repository
-2. File ⟶ Edit ⟶ Preferences ⟶ Install...
-3. Select `__init__.py`
-4. Enable addon
-5. Use it by pressing "N" in the viewport (addon settings are located in the right sidebar under "Bake")
+- Batch bake texture maps
+- Batch resize texture maps
+- Batch setup nodes
+- Batch export models
 
-# Development
+# Setup
+
+## Installation
+
+1. Download this repository (.zip)
+2. Edit ⟶ Preferences... ⟶ Addons ⟶ Install...
+3. Select downloaded .zip file
+4. Enable the "Postgrammetry" addon
+5. Panel is located in the viewport after pressing "N"
+
+## Development
 
 1. Install [Blender Development Extension](https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development) for Visual Studio Code
 2. Start Blender (CTRL + SHIFT + P and select "Blender: Start"
