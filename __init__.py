@@ -1,10 +1,10 @@
 bl_info = {
-    'name': 'Batch Baker',
+    'name': 'Postgrammetry',
     'author': 'Florian Ludewig',
     'description':
-    'Batch baking from low to high poly to multiple low poly meshes',
+    'Easy workflows for post photogrammetry cleanup',
     'blender': (2, 80, 0),
-    'version': (0, 4, 1),
+    'version': (0, 5, 0),
     'location': 'View3D',
     'category': 'Automation'
 }
@@ -12,11 +12,17 @@ bl_info = {
 import bpy
 import os
 
-from .panel import BB_PT_Main
-from .bake import BB_OT_BatchBake
-from .generate_cages import BB_OT_GenerateCages
+from .baking.panel import BB_PT_Main
+from .baking.bake import BB_OT_BatchBake
+from .baking.generate_cages import BB_OT_GenerateCages
 
-classes = (BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages)
+from .export.panel import ExportPanel
+from .export.export import BatchExportOperator
+
+classes = (
+  BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages,
+  ExportPanel, BatchExportOperator
+  )
 
 
 def register():
@@ -86,6 +92,17 @@ def register():
         name='bake_size_16k', default=False)
 
 
+    # export
+    bpy.types.Scene.export_out_path = bpy.props.StringProperty(
+        name="export_out_path",
+        default='//',
+        description="The folder your models will be saved to",
+        subtype='DIR_PATH')
+    bpy.types.Scene.export_type_obj = bpy.props.BoolProperty(name='export_type_obj',
+                                                          default=True)
+    bpy.types.Scene.export_type_fbx = bpy.props.BoolProperty(name='export_type_fbx',
+                                                          default=True)
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
@@ -106,6 +123,10 @@ def unregister():
     del bpy.types.Scene.bake_size_4k
     del bpy.types.Scene.bake_size_8k
     del bpy.types.Scene.bake_size_16k
+
+    del bpy.types.Scene.export_out_path
+    del bpy.types.Scene.export_type_obj
+    del bpy.types.Scene.export_type_fbx
 
 
 if __name__ == '__main__':
