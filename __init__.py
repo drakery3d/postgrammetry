@@ -13,18 +13,16 @@ import bpy
 import os
 
 
-from .baking.panel import BB_PT_Main
-from .baking.bake import BB_OT_BatchBake, OpenBakeDirectoryOperator
-from .baking.generate_cages import BB_OT_GenerateCages
+from .baking.panel import BakePanel
+from .baking.bake import BatchBakeOperator, OpenBakeDirectoryOperator
+from .baking.generate_cages import GnerateCagesOperator
 
 from .export.panel import ExportPanel
 from .export.export import BatchExportOperator, OpenExportDirectoryOperator
 
-classes = (
-  BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages, OpenBakeDirectoryOperator,
-  ExportPanel, BatchExportOperator, OpenExportDirectoryOperator
-  )
-
+bake_classes = (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator)
+export_classes = (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
+classes = bake_classes + export_classes
 
 def register():
     for cls in classes:
@@ -103,6 +101,8 @@ def register():
                                                           default=True)
     bpy.types.Scene.export_type_fbx = bpy.props.BoolProperty(name='export_type_fbx',
                                                           default=True)
+    bpy.types.Scene.export_type_glb = bpy.props.BoolProperty(name='export_type_glb',
+                                                          default=False)
 
 def unregister():
     for cls in classes:
@@ -128,6 +128,7 @@ def unregister():
     del bpy.types.Scene.export_out_path
     del bpy.types.Scene.export_type_obj
     del bpy.types.Scene.export_type_fbx
+    del bpy.types.Scene.export_type_glb
 
 
 if __name__ == '__main__':

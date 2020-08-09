@@ -1,9 +1,6 @@
 import bpy
-import os
 
 from ..utils import get_absolute_path, open_os_directory
-
-# TODO use os.path.join to create file paths
 
 class BatchExportOperator(bpy.types.Operator):
     bl_idname = 'postgrammetry.export'
@@ -27,6 +24,8 @@ class Export():
             self.fbx(obj)
           if (bpy.context.scene.export_type_obj):
             self.obj(obj)
+          if (bpy.context.scene.export_type_glb):
+            self.glb(obj)
 
       for obj in objects:
           obj.select_set(True)
@@ -38,6 +37,10 @@ class Export():
     def obj(self, obj):
         filepath = bpy.path.abspath(self.base_filepath + obj.name + '.obj')
         bpy.ops.export_scene.obj(filepath=filepath, use_selection=True)
+
+    def glb(self, obj):
+        filepath = bpy.path.abspath(self.base_filepath + obj.name + '.glb')
+        bpy.ops.export_scene.gltf(filepath=filepath, use_selection=True)
 
 class OpenExportDirectoryOperator(bpy.types.Operator):
     bl_idname = 'postgrammetry.export_open_directory'

@@ -6,7 +6,7 @@ class ExportPanel(bpy.types.Panel):
     bl_idname = 'MAIN_PT_batch_exporter'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Export'
+    bl_category = 'Postgrammetry'
 
     def draw(self, context):
         layout = self.layout
@@ -21,14 +21,8 @@ class ExportPanel(bpy.types.Panel):
         row = col.row(align=True)
         row.prop(context.scene, "export_type_obj", icon="BLANK1", text="obj")
         row.prop(context.scene, "export_type_fbx", icon="BLANK1", text="fbx")
-        # TODO more types
-        # row.prop(context.scene, "export_type_glb", icon="BLANK1", text="glb")
-        # row.prop(context.scene, "export_type_gltf", icon="BLANK1", text="gltf")
-        # row.prop(context.scene, "export_type_dae", icon="BLANK1", text="dae")
+        row.prop(context.scene, "export_type_glb", icon="BLANK1", text="glb")
         row = col.row(align=True)
 
         row = layout.row()
         row.operator('postgrammetry.export', text='Export')
-
-
-        # TODO option to center objects

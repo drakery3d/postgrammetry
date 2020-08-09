@@ -1,12 +1,12 @@
 import bpy
 
 
-class BB_PT_Main(bpy.types.Panel):
+class BakePanel(bpy.types.Panel):
     bl_label = 'Batch Baking'
     bl_idname = 'MAIN_PT_batch_baker'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'Bake'
+    bl_category = 'Postgrammetry'
 
     def draw(self, context):
         layout = self.layout

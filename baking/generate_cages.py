@@ -3,7 +3,7 @@ import bpy
 from ..utils import un_hide
 
 
-class BB_OT_GenerateCages(bpy.types.Operator):
+class GnerateCagesOperator(bpy.types.Operator):
     bl_idname = 'bb.generate_cages'
     bl_label = 'generate cages'
     bl_options = {'UNDO'}

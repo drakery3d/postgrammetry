@@ -4,7 +4,7 @@ import time
 
 from ..utils import un_hide, hide, remove_all_materials_from, remove_unused_images, remove_unused_materials, get_absolute_path, open_os_directory
 
-class BB_OT_BatchBake(bpy.types.Operator):
+class BatchBakeOperator(bpy.types.Operator):
     bl_idname = 'bb.bake'
     bl_label = 'batch bake'
     bl_options = {'UNDO'}
