@@ -1,6 +1,6 @@
 import bpy
 
-from .utils import un_hide
+from ..utils import un_hide
 
 
 class BB_OT_GenerateCages(bpy.types.Operator):

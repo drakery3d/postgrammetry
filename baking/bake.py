@@ -2,8 +2,7 @@ import bpy
 import uuid
 import time
 
-from .utils import un_hide, hide, remove_all_materials_from, remove_unused_images, remove_unused_materials
-
+from ..utils import un_hide, hide, remove_all_materials_from, remove_unused_images, remove_unused_materials, get_absolute_path, open_os_directory
 
 class BB_OT_BatchBake(bpy.types.Operator):
     bl_idname = 'bb.bake'
@@ -237,3 +236,13 @@ class Bake():
             return '16k'
         else:
             return ''
+
+class OpenBakeDirectoryOperator(bpy.types.Operator):
+    bl_idname = 'postgrammetry.bake_open_directory'
+    bl_label = 'open bake directory'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+      path = get_absolute_path(bpy.context.scene.bake_out_path)
+      open_os_directory(path)
+      return {'FINISHED'}

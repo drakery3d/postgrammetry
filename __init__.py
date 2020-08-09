@@ -12,16 +12,17 @@ bl_info = {
 import bpy
 import os
 
+
 from .baking.panel import BB_PT_Main
-from .baking.bake import BB_OT_BatchBake
+from .baking.bake import BB_OT_BatchBake, OpenBakeDirectoryOperator
 from .baking.generate_cages import BB_OT_GenerateCages
 
 from .export.panel import ExportPanel
-from .export.export import BatchExportOperator
+from .export.export import BatchExportOperator, OpenExportDirectoryOperator
 
 classes = (
-  BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages,
-  ExportPanel, BatchExportOperator
+  BB_OT_BatchBake, BB_PT_Main, BB_OT_GenerateCages, OpenBakeDirectoryOperator,
+  ExportPanel, BatchExportOperator, OpenExportDirectoryOperator
   )
 
 

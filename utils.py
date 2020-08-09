@@ -1,5 +1,8 @@
 import bpy
-
+import subprocess
+import sys
+import platform
+import os
 
 def hide(obj_name):
     obj = bpy.data.objects.get(obj_name)
@@ -28,3 +31,16 @@ def remove_unused_materials():
     for material in bpy.data.materials:
         if not material.users:
             bpy.data.materials.remove(material)
+
+def get_absolute_path(relative_path):
+    filepath = bpy.data.filepath
+    directory = os.path.dirname(filepath)
+    return os.path.abspath(directory + relative_path)
+
+def open_os_directory(path):
+    if platform.system() == "Windows":
+        os.startfile(path)
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])

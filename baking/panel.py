@@ -54,6 +54,8 @@ class BB_PT_Main(bpy.types.Panel):
         # output
         row = layout.column()
         row.prop(context.scene, 'bake_out_path', text='Output')
+        row = layout.row()
+        row.operator('postgrammetry.bake_open_directory', text='Open directory')
         box = layout.box()
         col = box.column(align=True)
         row = col.row(align=True)
