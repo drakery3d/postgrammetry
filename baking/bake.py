@@ -157,7 +157,7 @@ class Bake():
         self.setup_baking_settings()
 
         TYPE = 'DIFFUSE'
-        bake_type = TYPE.lower()
+        bake_type = 'albedo'
         file_format_extension = 'tif'
 
         bpy.ops.object.bake(type=TYPE)
@@ -222,10 +222,6 @@ class Bake():
         # TODO delete copied images
 
     def get_size_abbreviation(self, size_in_pixels):
-        if size_in_pixels == 2**9:
-            return '512px'
-        if size_in_pixels == 2**10:
-            return '1k'
         if size_in_pixels == 2**11:
             return '2k'
         if size_in_pixels == 2**12:
