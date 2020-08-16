@@ -13,6 +13,7 @@ class BatchRenderOperator(bpy.types.Operator):
 
 class Render():
   def __init__(self):
+    bpy.context.scene.use_nodes = True
 
     for obj_name in [obj.name for obj in bpy.data.objects]:
       hide(obj_name)
@@ -37,20 +38,41 @@ class Render():
     ouput_node = nodes.get("Material Output")
     material.node_tree.links.new(diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
 
+    shader_node = nodes.get('Principled BSDF')
+    textures = []
+    self.traverse_node_images(shader_node, textures, None)
+
     self.setup_evee()
-    for texture in textures:
+    for texture_info in textures:
+      texture = texture_info[0]
+      texture_input_name = texture_info[1]
       image_texture_node = nodes.new('ShaderNodeTexImage')
       image = bpy.data.images[texture.name]
       image.colorspace_settings.name = 'sRGB'
       image_texture_node.image = image
       material.node_tree.links.new(image_texture_node.outputs['Color'], diffuse_shader_node.inputs['Color'])
-      bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.export_out_path + texture.name)
+      bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + texture_input_name.lower().replace(' ', '-'))
       bpy.ops.render.render(write_still = True)
       nodes.remove(image_texture_node)
 
     principled_bsdf = nodes.get("Principled BSDF")
     material.node_tree.links.new(principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
     nodes.remove(diffuse_shader_node)
+
+  def traverse_node_images(self, node, textures, origin_input):
+    if node.type == 'TEX_IMAGE':
+      texture_info = (node.image, origin_input.name)
+      textures.append(texture_info)
+    if len(node.inputs) == 0:
+      return textures
+    for input in node.inputs:
+      origin = origin_input
+      if origin == None:
+        origin = input
+      if len(input.links) == 0:
+        continue
+      for link in input.links:
+        self.traverse_node_images(link.from_node, textures, origin)
 
   def render_wireframe(self, obj):
     bpy.context.scene.render.use_freestyle = True
