@@ -23,6 +23,14 @@ class Render():
 
     self.render_textures(obj)
     self.render_wireframe(obj)
+    self.render_full(obj)
+
+  def render_full(self, obj):
+    self.setup_cycles()
+    # TODO denoise (or button to setup compositing nodes)
+    bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'full')
+    bpy.ops.render.render(write_still = True)
+
 
   def render_textures(self, obj):
     material = obj.material_slots[0].material
@@ -110,14 +118,42 @@ class Render():
     nodes.remove(diffuse_shader_node)
     bpy.context.scene.render.use_freestyle = False
 
+  def setup_cycles(self):
+    bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.scene.render.film_transparent = True
+    bpy.context.scene.cycles.use_adaptive_sampling = True
+    bpy.context.scene.cycles.adaptive_threshold = 0.1
+    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.cycles.device = 'GPU'
+    bpy.context.scene.cycles.transmission_bounces = 2
+    bpy.context.scene.cycles.transparent_max_bounces = 2
+    world = bpy.context.scene.world
+    world.use_nodes = True
+    # TODO hdri user input with rotation
+    # TODO add sun with sun addon
+
+    env_texture = world.node_tree.nodes.get("Environment Texture")
+    if env_texture == None:
+      env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
+
+    ouput_node = world.node_tree.nodes.get("World Output")
+    world.node_tree.links.new(env_texture.outputs['Color'], ouput_node.inputs['Surface'])
+
+
   def setup_evee(self):
     bpy.context.scene.render.engine = 'BLENDER_EEVEE'
     bpy.context.scene.render.film_transparent = True
     bpy.context.scene.render.use_freestyle = False
 
-    # TODO create node if not exists
-    # world environment strength
-    bpy.data.worlds["World"].node_tree.nodes["Background"].inputs[1].default_value = 20
+    world = bpy.context.scene.world
+    world.use_nodes = True
+
+    background_node = world.node_tree.nodes.get("Background")
+    if background_node == None:
+      background_node = world.node_tree.nodes.new('ShaderNodeBackground')
+
+    ouput_node = world.node_tree.nodes.get("World Output")
+    world.node_tree.links.new(background_node.outputs['Background'], ouput_node.inputs['Surface'])
 
 class OpenRenderDirectoryOperator(bpy.types.Operator):
     bl_idname = 'postgrammetry.render_open_directory'
