@@ -1,11 +1,12 @@
 import bpy
 import uuid
 import time
+import os
 
 from ..utils import un_hide, hide, remove_all_materials_from, remove_unused_images, remove_unused_materials, get_absolute_path, open_os_directory
 
 class BatchBakeOperator(bpy.types.Operator):
-    bl_idname = 'bb.bake'
+    bl_idname = 'postgrammetry.bake'
     bl_label = 'batch bake'
     bl_options = {'UNDO'}
 
@@ -250,3 +251,35 @@ class OpenBakeDirectoryOperator(bpy.types.Operator):
       path = get_absolute_path(bpy.context.scene.bake_out_path)
       open_os_directory(path)
       return {'FINISHED'}
+
+
+
+class ResizeTexturesOperator(bpy.types.Operator):
+    bl_idname = 'postgrammetry.resize_textures'
+    bl_label = 'batch resize textures'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        path = bpy.context.scene.bake_out_path
+        files = os.listdir(path)
+        for file in files:
+          filepath = os.path.join(path, file)
+          if os.path.isfile(filepath):
+            extension = os.path.splitext(file)[1]
+            if extension == '.tif':
+              image = None
+              try:
+                image = bpy.data.images[filepath]
+              except:
+                  pass
+              if image == None:
+                image = bpy.data.images.load(filepath)
+              temp = bpy.data.images[image.name].copy()
+              temp.scale(2048, 2048)
+              temp.filepath_raw = os.path.join(path, 'image_2k.jpg')
+              # TODO consider compressed tiffs?
+              # temp.file_format = 'TIFF'
+              temp.file_format = 'JPEG'
+              temp.save()
+              bpy.data.images.remove(temp)
+        return {'FINISHED'}

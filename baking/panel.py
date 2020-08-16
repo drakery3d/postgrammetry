@@ -67,7 +67,9 @@ class BakePanel(bpy.types.Panel):
 
         # bake
         row = layout.row()
-        row.operator('bb.bake', text='Bake')
+        row.operator('postgrammetry.bake', text='Bake')
         if bpy.context.scene.baking_done:
             row = layout.row()
             row.label(text=f'Last bake took {bpy.context.scene.baking_time}s')
+
+        row.operator('postgrammetry.resize_textures', text='Resize Textures')

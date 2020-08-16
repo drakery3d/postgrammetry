@@ -4,8 +4,9 @@ This addon will help you to automate the entire cleanup process for a photo-scan
 
 - Batch bake texture maps
 - Batch resize texture maps
-- Batch setup nodes
+- Batch decimate nodes
 - Batch export models
+- Batch render preview images
 
 # Setup
 

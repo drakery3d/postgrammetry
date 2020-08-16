@@ -23,7 +23,7 @@ from .export.export import *
 from .rendering.panel import *
 from .rendering.render import *
 
-bake_classes = (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator)
+bake_classes = (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator, ResizeTexturesOperator)
 export_classes = (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
 render_classes = (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
 classes = bake_classes + export_classes + render_classes
