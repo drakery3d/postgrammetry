@@ -47,12 +47,13 @@ class Render():
       texture = texture_info[0]
       texture_input_name = texture_info[1]
       image_texture_node = nodes.new('ShaderNodeTexImage')
-      image = bpy.data.images[texture.name]
+      image = bpy.data.images[texture.name].copy()
       image.colorspace_settings.name = 'sRGB'
       image_texture_node.image = image
       material.node_tree.links.new(image_texture_node.outputs['Color'], diffuse_shader_node.inputs['Color'])
       bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + texture_input_name.lower().replace(' ', '-'))
       bpy.ops.render.render(write_still = True)
+      bpy.data.images.remove(image)
       nodes.remove(image_texture_node)
 
     principled_bsdf = nodes.get("Principled BSDF")
@@ -101,7 +102,7 @@ class Render():
     bpy.ops.object.mode_set(mode='OBJECT')
 
 
-    bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.export_out_path + 'wireframe')
+    bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'wireframe')
     bpy.ops.render.render(write_still = True)
 
     principled_bsdf = nodes.get("Principled BSDF")
