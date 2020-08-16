@@ -2,9 +2,9 @@ bl_info = {
     'name': 'Postgrammetry',
     'author': 'Florian Ludewig',
     'description':
-    'Easy workflows for post photogrammetry cleanup',
+    'Automation tools for post photogrammetry asset creation',
     'blender': (2, 80, 0),
-    'version': (0, 5, 0),
+    'version': (0, 6, 0),
     'location': 'View3D',
     'category': 'Automation'
 }
@@ -23,10 +23,14 @@ from .export.export import *
 from .rendering.panel import *
 from .rendering.render import *
 
-bake_classes = (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator, ResizeTexturesOperator)
-export_classes = (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
-render_classes = (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
-classes = bake_classes + export_classes + render_classes
+from .resizing.panel import *
+from .resizing.resize import *
+
+classes = []
+classes += (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator)
+classes += (ResizePanel, BatchResizeTexturesOperator)
+classes += (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
+classes += (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
 
 def register():
     for cls in classes:
@@ -115,6 +119,13 @@ def register():
         description="The folder your images will be saved to",
         subtype='DIR_PATH')
 
+    # resize
+    bpy.types.Scene.resize_path = bpy.props.StringProperty(
+        name="resize_path",
+        default='//',
+        description="The directory your source images are located",
+        subtype='DIR_PATH')
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
@@ -142,6 +153,8 @@ def unregister():
     del bpy.types.Scene.export_type_glb
 
     del bpy.types.Scene.render_out_path
+
+    del bpy.types.Scene.resize_path
 
 
 if __name__ == '__main__':

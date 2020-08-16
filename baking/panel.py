@@ -2,7 +2,7 @@ import bpy
 
 
 class BakePanel(bpy.types.Panel):
-    bl_label = 'Batch Baking'
+    bl_label = 'Baking'
     bl_idname = 'MAIN_PT_batch_baker'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -71,5 +71,3 @@ class BakePanel(bpy.types.Panel):
         if bpy.context.scene.baking_done:
             row = layout.row()
             row.label(text=f'Last bake took {bpy.context.scene.baking_time}s')
-
-        row.operator('postgrammetry.resize_textures', text='Resize Textures')

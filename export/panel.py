@@ -2,7 +2,7 @@ import bpy
 
 
 class ExportPanel(bpy.types.Panel):
-    bl_label = 'Batch Export'
+    bl_label = 'Exporting'
     bl_idname = 'MAIN_PT_batch_exporter'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'

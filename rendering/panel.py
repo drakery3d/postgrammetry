@@ -2,7 +2,7 @@ import bpy
 
 
 class RenderPanel(bpy.types.Panel):
-    bl_label = 'Batch Rendering'
+    bl_label = 'Rendering'
     bl_idname = 'MAIN_PT_batch_renderer'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
