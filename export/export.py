@@ -8,7 +8,6 @@ class BatchExportOperator(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
-      print("start export")
       Export()
       return {'FINISHED'}
 
@@ -51,6 +50,3 @@ class OpenExportDirectoryOperator(bpy.types.Operator):
       path = get_absolute_path(bpy.context.scene.export_out_path)
       open_os_directory(path)
       return {'FINISHED'}
-
-
-

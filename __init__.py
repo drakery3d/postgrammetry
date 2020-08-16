@@ -13,16 +13,20 @@ import bpy
 import os
 
 
-from .baking.panel import BakePanel
-from .baking.bake import BatchBakeOperator, OpenBakeDirectoryOperator
-from .baking.generate_cages import GnerateCagesOperator
+from .baking.panel import *
+from .baking.bake import *
+from .baking.generate_cages import *
 
-from .export.panel import ExportPanel
-from .export.export import BatchExportOperator, OpenExportDirectoryOperator
+from .export.panel import *
+from .export.export import *
+
+from .rendering.panel import *
+from .rendering.render import *
 
 bake_classes = (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator)
 export_classes = (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
-classes = bake_classes + export_classes
+render_classes = (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
+classes = bake_classes + export_classes + render_classes
 
 def register():
     for cls in classes:
@@ -104,6 +108,13 @@ def register():
     bpy.types.Scene.export_type_glb = bpy.props.BoolProperty(name='export_type_glb',
                                                           default=False)
 
+    # render
+    bpy.types.Scene.render_out_path = bpy.props.StringProperty(
+        name="render_out_path",
+        default='//',
+        description="The folder your images will be saved to",
+        subtype='DIR_PATH')
+
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
@@ -129,6 +140,8 @@ def unregister():
     del bpy.types.Scene.export_type_obj
     del bpy.types.Scene.export_type_fbx
     del bpy.types.Scene.export_type_glb
+
+    del bpy.types.Scene.render_out_path
 
 
 if __name__ == '__main__':

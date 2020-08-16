@@ -20,11 +20,11 @@ class BatchBakeOperator(bpy.types.Operator):
         for obj_name in [obj.name for obj in bpy.data.objects]:
             hide(obj_name)
 
-        low_objects_names = [
+        self.low_objects_names = [
             obj.name for obj in bpy.data.collections[
                 context.scene.lowpoly_bake_obj].all_objects
         ]
-        for obj_name in low_objects_names:
+        for obj_name in self.low_objects_names:
             Bake(high, obj_name)
 
         remove_unused_images()
@@ -217,7 +217,15 @@ class Bake():
                 resized = bpy.data.images.get(master_copy.name).copy()
                 resized.scale(size, size)
                 size_abbreviation = self.get_size_abbreviation(size)
-                resized.filepath_raw = f'{bpy.context.scene.bake_out_path}{self.low}_{type}_{size_abbreviation}.tif'
+
+                name = self.low
+                if len(self.low_objects_names) == 1:
+                    name.replace('lod0', '')
+                filepath_raw = f'{bpy.context.scene.bake_out_path}{name}_{type}'
+                if len(resized) != 1:
+                    filepath_raw = f'{filepath_raw}_{size_abbreviation}'
+                filepath_raw = f'{filepath_raw}.tif'
+
                 resized.save()
         # TODO delete copied images
 
