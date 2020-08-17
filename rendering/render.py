@@ -1,4 +1,5 @@
 import bpy
+import math
 
 from ..utils import get_absolute_path, open_os_directory, un_hide, hide
 
@@ -21,14 +22,30 @@ class Render():
     obj = bpy.context.object
     un_hide(obj.name)
 
+    # self.render_full(obj)
+    self.render_inspection(obj)
+    self.render_turntable(obj)
+
+  def render_turntable(self, obj):
+    self.setup_cycles()
+    number_of_pics = 8
+    count = 0
+    for _ in range(number_of_pics):
+      obj.rotation_euler[2] += 2 * math.pi / number_of_pics
+      bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'turntable_' + str(count))
+      bpy.ops.render.render(write_still = True)
+      count += 1
+    obj.rotation_euler[2] = 0
+
+  def render_inspection(self, obj):
     self.render_textures(obj)
     self.render_wireframe(obj)
-    self.render_full(obj)
+    # self.render_full(obj)
 
   def render_full(self, obj):
     self.setup_cycles()
     # TODO denoise (or button to setup compositing nodes)
-    bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'full')
+    # bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'full')
     bpy.ops.render.render(write_still = True)
 
 
@@ -122,11 +139,8 @@ class Render():
     bpy.context.scene.render.engine = 'CYCLES'
     bpy.context.scene.render.film_transparent = True
     bpy.context.scene.cycles.use_adaptive_sampling = True
-    bpy.context.scene.cycles.adaptive_threshold = 0.1
-    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.cycles.adaptive_threshold = 0.01
     bpy.context.scene.cycles.device = 'GPU'
-    bpy.context.scene.cycles.transmission_bounces = 2
-    bpy.context.scene.cycles.transparent_max_bounces = 2
     world = bpy.context.scene.world
     world.use_nodes = True
     # TODO hdri user input with rotation
