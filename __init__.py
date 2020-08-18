@@ -118,6 +118,7 @@ def register():
         default='//',
         description="The folder your images will be saved to",
         subtype='DIR_PATH')
+    bpy.types.Scene.turntable_image_count = bpy.props.IntProperty(name='turntable_image_count', default=7)
 
     # resize
     bpy.types.Scene.resize_path = bpy.props.StringProperty(
@@ -152,6 +153,7 @@ def unregister():
     del bpy.types.Scene.export_type_fbx
     del bpy.types.Scene.export_type_glb
 
+    del bpy.types.Scene.turntable_image_count
     del bpy.types.Scene.render_out_path
 
     del bpy.types.Scene.resize_path

@@ -22,13 +22,62 @@ class Render():
     obj = bpy.context.object
     un_hide(obj.name)
 
-    # self.render_full(obj)
-    self.render_inspection(obj)
-    self.render_turntable(obj)
+    # switch on nodes and get reference
+    bpy.context.scene.use_nodes = True
+    tree = bpy.context.scene.node_tree
+
+    # clear default nodes
+    for node in tree.nodes:
+        tree.nodes.remove(node)
+
+    # create input image node
+    render_layer_node = tree.nodes.new(type='CompositorNodeRLayers')
+    render_layer_node.location = 0,0
+    denoise_node = tree.nodes.new(type='CompositorNodeDenoise')
+    denoise_node.location = 300,0
+    tree.links.new(denoise_node.inputs['Image'], render_layer_node.outputs['Noisy Image'])
+    tree.links.new(denoise_node.inputs['Normal'], render_layer_node.outputs['Denoising Normal'])
+    tree.links.new(denoise_node.inputs['Albedo'], render_layer_node.outputs['Denoising Albedo'])
+    output_node_transparent = tree.nodes.new(type='CompositorNodeOutputFile')
+    output_node_transparent.location = 500,0
+    output_node_transparent.base_path = bpy.context.scene.render_out_path
+    output_node_transparent.file_slots.remove(output_node_transparent.inputs[0])
+    output_node_transparent.file_slots.new("transparent")
+    tree.links.new(denoise_node.outputs['Image'], output_node_transparent.inputs['transparent'])
+
+    black_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+    black_bg_mix_node.location = 500,-300
+    tree.links.new(render_layer_node.outputs['Alpha'], black_bg_mix_node.inputs[0])
+    tree.links.new(denoise_node.outputs['Image'], black_bg_mix_node.inputs[2])
+    black = 0.0012
+    black_bg_mix_node.inputs[1].default_value = (black, black, black, 1)
+    output_node_black_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+    output_node_black_bg.location = 700,-300
+    output_node_black_bg.base_path = bpy.context.scene.render_out_path
+    output_node_black_bg.file_slots.remove(output_node_black_bg.inputs[0])
+    output_node_black_bg.file_slots.new("black-bg")
+    tree.links.new(black_bg_mix_node.outputs['Image'], output_node_black_bg.inputs['black-bg'])
+
+    white_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+    white_bg_mix_node.location = 500,-600
+    tree.links.new(render_layer_node.outputs['Alpha'], white_bg_mix_node.inputs[0])
+    tree.links.new(denoise_node.outputs['Image'], white_bg_mix_node.inputs[2])
+    white_bg_mix_node.inputs[1].default_value = (1, 1, 1, 1)
+    output_node_white_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+    output_node_white_bg.location = 700,-300
+    output_node_white_bg.base_path = bpy.context.scene.render_out_path
+    output_node_white_bg.file_slots.remove(output_node_white_bg.inputs[0])
+    output_node_white_bg.file_slots.new("white-bg")
+    tree.links.new(white_bg_mix_node.outputs['Image'], output_node_white_bg.inputs['white-bg'])
+
+
+    self.render_full(obj)
+    # self.render_inspection(obj)
+    # self.render_turntable(obj)
 
   def render_turntable(self, obj):
     self.setup_cycles()
-    number_of_pics = 8
+    number_of_pics = bpy.context.scene.turntable_image_count
     count = 0
     for _ in range(number_of_pics):
       obj.rotation_euler[2] += 2 * math.pi / number_of_pics

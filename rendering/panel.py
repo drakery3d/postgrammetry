@@ -20,4 +20,7 @@ class RenderPanel(bpy.types.Panel):
         row.prop(bpy.context.scene.cycles, 'samples')
 
         row = layout.row()
+        row.prop(context.scene, 'turntable_image_count')
+
+        row = layout.row()
         row.operator('postgrammetry.render', text='Render')
