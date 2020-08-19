@@ -1,6 +1,8 @@
 import bpy
 import os
 
+from ..utils import get_absolute_path, open_os_directory
+
 class BatchResizeTexturesOperator(bpy.types.Operator):
     bl_idname = 'postgrammetry.resize_textures'
     bl_label = 'batch resize textures'
@@ -58,3 +60,13 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
       temp.filepath_raw = os.path.join(path, f'{name}_{str(size)}px.jpg')
       temp.save()
       bpy.data.images.remove(temp)
+
+class OpenResizeDirectoryOperator(bpy.types.Operator):
+    bl_idname = 'postgrammetry.resize_open_directory'
+    bl_label = 'open resize directory'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+      path = get_absolute_path(bpy.context.scene.resize_path)
+      open_os_directory(path)
+      return {'FINISHED'}

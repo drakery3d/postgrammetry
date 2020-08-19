@@ -1,4 +1,6 @@
 # TODO python code formatter
+# TODO save images with non-transparent background as jpg
+# TODO make hdri rotation adjustable
 
 import bpy
 import math
@@ -98,12 +100,12 @@ class Render():
 
   def rename_file_out_ms(self, name):
     ms = int(round(time.time() * 1000))
-    self.rename_compositing_file_outputs(f'_{name}_{str(ms)}_')
+    self.rename_compositing_file_outputs(f'{str(ms)}_{name}_')
 
   def rename_compositing_file_outputs(self, prefix):
-    transparent_name = 'transparent' + prefix
-    black_background_name = 'black-bg' + prefix
-    white_background_name = 'white-bg' + prefix
+    transparent_name = prefix + 'transparent'
+    black_background_name = prefix + 'black-bg'
+    white_background_name = prefix + 'white-bg'
 
     tree = bpy.context.scene.node_tree
 
@@ -149,7 +151,7 @@ class Render():
     self.setup_evee()
     self.render_textures()
     self.render_wireframe()
-    self.render_full()
+    # self.render_full()
 
   def render_full(self):
     self.setup_cycles()
