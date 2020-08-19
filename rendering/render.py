@@ -186,6 +186,7 @@ class Render():
 
   def setup_cycles(self):
     bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.scene.view_layers[0].cycles.denoising_store_passes = True
     bpy.context.scene.render.film_transparent = True
     bpy.context.scene.cycles.use_adaptive_sampling = True
     bpy.context.scene.cycles.adaptive_threshold = 0.01
