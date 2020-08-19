@@ -20,8 +20,7 @@ from .baking.generate_cages import *
 from .export.panel import *
 from .export.export import *
 
-from .rendering.panel import *
-from .rendering.render import *
+from .rendering import register_rendering, unregister_rendering
 
 from .resizing.panel import *
 from .resizing.resize import *
@@ -30,9 +29,9 @@ classes = []
 classes += (BatchBakeOperator, BakePanel, GnerateCagesOperator, OpenBakeDirectoryOperator)
 classes += (ResizePanel, BatchResizeTexturesOperator)
 classes += (ExportPanel, BatchExportOperator, OpenExportDirectoryOperator)
-classes += (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
 
 def register():
+    print("Register Postgrammetry addon")
     for cls in classes:
         bpy.utils.register_class(cls)
 
@@ -112,19 +111,6 @@ def register():
     bpy.types.Scene.export_type_glb = bpy.props.BoolProperty(name='export_type_glb',
                                                           default=False)
 
-    # render
-    bpy.types.Scene.render_out_path = bpy.props.StringProperty(
-        name="render_out_path",
-        default='//',
-        description="The folder your images will be saved to",
-        subtype='DIR_PATH')
-    bpy.types.Scene.render_hdri = bpy.props.StringProperty(
-        name="render_hdri",
-        default='//',
-        description="The hdri used for rendering",
-        subtype='FILE_PATH')
-    bpy.types.Scene.turntable_image_count = bpy.props.IntProperty(name='turntable_image_count', default=7)
-
     # resize
     bpy.types.Scene.resize_path = bpy.props.StringProperty(
         name="resize_path",
@@ -132,7 +118,11 @@ def register():
         description="The directory your source images are located",
         subtype='DIR_PATH')
 
+    register_rendering()
+    print("Successfully registered Postgrammetry addon")
+
 def unregister():
+    print("Unregister Postgrammetry addon")
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
@@ -158,10 +148,10 @@ def unregister():
     del bpy.types.Scene.export_type_fbx
     del bpy.types.Scene.export_type_glb
 
-    del bpy.types.Scene.turntable_image_count
-    del bpy.types.Scene.render_out_path
-
     del bpy.types.Scene.resize_path
+
+    unregister_rendering()
+    print("Successfully unregistered Postgrammetry addon")
 
 
 if __name__ == '__main__':
