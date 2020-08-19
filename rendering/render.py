@@ -1,3 +1,5 @@
+# TODO python code formatter
+
 import bpy
 import math
 import time
@@ -10,7 +12,10 @@ class BatchRenderOperator(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
+      start_time = time.time()
       Render()
+      end_time = time.time()
+      print("Rendering done in " + str(end_time - start_time) + " seconds")
       return {'FINISHED'}
 
 class Render():
@@ -24,7 +29,7 @@ class Render():
     un_hide(self.obj.name)
 
     self.render_full()
-    #self.render_inspection()
+    self.render_inspection()
     self.render_turntable()
 
   def setup_compositing_nodes(self):
@@ -33,35 +38,61 @@ class Render():
     for node in tree.nodes:
         tree.nodes.remove(node)
 
-    render_layer_node = tree.nodes.new(type='CompositorNodeRLayers')
-    render_layer_node.location = 0,0
-    self.denoise_node = tree.nodes.new(type='CompositorNodeDenoise')
-    self.denoise_node.location = 300,0
-    tree.links.new(self.denoise_node.inputs['Image'], render_layer_node.outputs['Noisy Image'])
-    tree.links.new(self.denoise_node.inputs['Normal'], render_layer_node.outputs['Denoising Normal'])
-    tree.links.new(self.denoise_node.inputs['Albedo'], render_layer_node.outputs['Denoising Albedo'])
-    self.output_node_transparent = tree.nodes.new(type='CompositorNodeOutputFile')
-    self.output_node_transparent.location = 500,0
-    self.output_node_transparent.base_path = bpy.context.scene.render_out_path
+    self.render_layer_node = tree.nodes.new(type='CompositorNodeRLayers')
+    self.render_layer_node.location = 0,0
 
-    self.black_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
-    self.black_bg_mix_node.location = 500,-300
-    tree.links.new(render_layer_node.outputs['Alpha'], self.black_bg_mix_node.inputs[0])
-    tree.links.new(self.denoise_node.outputs['Image'], self.black_bg_mix_node.inputs[2])
-    black = 0.0012
-    self.black_bg_mix_node.inputs[1].default_value = (black, black, black, 1)
-    self.output_node_black_bg = tree.nodes.new(type='CompositorNodeOutputFile')
-    self.output_node_black_bg.location = 700,-300
-    self.output_node_black_bg.base_path = bpy.context.scene.render_out_path
+    if bpy.context.scene.render.engine == 'CYCLES':
+      self.denoise_node = tree.nodes.new(type='CompositorNodeDenoise')
+      self.denoise_node.location = 300,0
+      tree.links.new(self.denoise_node.inputs['Image'], self.render_layer_node.outputs['Noisy Image'])
+      tree.links.new(self.denoise_node.inputs['Normal'], self.render_layer_node.outputs['Denoising Normal'])
+      tree.links.new(self.denoise_node.inputs['Albedo'], self.render_layer_node.outputs['Denoising Albedo'])
+      self.output_node_transparent = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_transparent.location = 500,0
+      self.output_node_transparent.base_path = bpy.context.scene.render_out_path
 
-    self.white_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
-    self.white_bg_mix_node.location = 500,-600
-    tree.links.new(render_layer_node.outputs['Alpha'], self.white_bg_mix_node.inputs[0])
-    tree.links.new(self.denoise_node.outputs['Image'], self.white_bg_mix_node.inputs[2])
-    self.white_bg_mix_node.inputs[1].default_value = (1, 1, 1, 1)
-    self.output_node_white_bg = tree.nodes.new(type='CompositorNodeOutputFile')
-    self.output_node_white_bg.location = 700,-600
-    self.output_node_white_bg.base_path = bpy.context.scene.render_out_path
+      self.black_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+      self.black_bg_mix_node.location = 500,-300
+      tree.links.new(self.render_layer_node.outputs['Alpha'], self.black_bg_mix_node.inputs[0])
+      tree.links.new(self.denoise_node.outputs['Image'], self.black_bg_mix_node.inputs[2])
+      black = 0.0012
+      self.black_bg_mix_node.inputs[1].default_value = (black, black, black, 1)
+      self.output_node_black_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_black_bg.location = 700,-300
+      self.output_node_black_bg.base_path = bpy.context.scene.render_out_path
+
+      self.white_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+      self.white_bg_mix_node.location = 500,-600
+      tree.links.new(self.render_layer_node.outputs['Alpha'], self.white_bg_mix_node.inputs[0])
+      tree.links.new(self.denoise_node.outputs['Image'], self.white_bg_mix_node.inputs[2])
+      self.white_bg_mix_node.inputs[1].default_value = (1, 1, 1, 1)
+      self.output_node_white_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_white_bg.location = 700,-600
+      self.output_node_white_bg.base_path = bpy.context.scene.render_out_path
+
+    if bpy.context.scene.render.engine == 'BLENDER_EEVEE':
+      self.output_node_transparent = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_transparent.location = 500,0
+      self.output_node_transparent.base_path = bpy.context.scene.render_out_path
+
+      self.black_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+      self.black_bg_mix_node.location = 500,-300
+      tree.links.new(self.render_layer_node.outputs['Alpha'], self.black_bg_mix_node.inputs[0])
+      tree.links.new(self.render_layer_node.outputs['Image'], self.black_bg_mix_node.inputs[2])
+      black = 0.0012
+      self.black_bg_mix_node.inputs[1].default_value = (black, black, black, 1)
+      self.output_node_black_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_black_bg.location = 700,-300
+      self.output_node_black_bg.base_path = bpy.context.scene.render_out_path
+
+      self.white_bg_mix_node = tree.nodes.new(type='CompositorNodeMixRGB')
+      self.white_bg_mix_node.location = 500,-600
+      tree.links.new(self.render_layer_node.outputs['Alpha'], self.white_bg_mix_node.inputs[0])
+      tree.links.new(self.render_layer_node.outputs['Image'], self.white_bg_mix_node.inputs[2])
+      self.white_bg_mix_node.inputs[1].default_value = (1, 1, 1, 1)
+      self.output_node_white_bg = tree.nodes.new(type='CompositorNodeOutputFile')
+      self.output_node_white_bg.location = 700,-600
+      self.output_node_white_bg.base_path = bpy.context.scene.render_out_path
 
     self.rename_file_out_ms('render')
 
@@ -76,18 +107,31 @@ class Render():
 
     tree = bpy.context.scene.node_tree
 
-    self.output_node_transparent.file_slots.remove(self.output_node_transparent.inputs[0])
-    self.output_node_transparent.file_slots.new(transparent_name)
-    tree.links.new(self.denoise_node.outputs['Image'], self.output_node_transparent.inputs[transparent_name])
+    if bpy.context.scene.render.engine == 'CYCLES':
+      self.output_node_transparent.file_slots.remove(self.output_node_transparent.inputs[0])
+      self.output_node_transparent.file_slots.new(transparent_name)
+      tree.links.new(self.denoise_node.outputs['Image'], self.output_node_transparent.inputs[transparent_name])
 
-    self.output_node_black_bg.file_slots.remove(self.output_node_black_bg.inputs[0])
-    self.output_node_black_bg.file_slots.new(black_background_name)
-    tree.links.new(self.black_bg_mix_node.outputs['Image'], self.output_node_black_bg.inputs[black_background_name])
+      self.output_node_black_bg.file_slots.remove(self.output_node_black_bg.inputs[0])
+      self.output_node_black_bg.file_slots.new(black_background_name)
+      tree.links.new(self.black_bg_mix_node.outputs['Image'], self.output_node_black_bg.inputs[black_background_name])
 
-    self.output_node_white_bg.file_slots.remove(self.output_node_white_bg.inputs[0])
-    self.output_node_white_bg.file_slots.new(white_background_name)
-    tree.links.new(self.white_bg_mix_node.outputs['Image'], self.output_node_white_bg.inputs[white_background_name])
+      self.output_node_white_bg.file_slots.remove(self.output_node_white_bg.inputs[0])
+      self.output_node_white_bg.file_slots.new(white_background_name)
+      tree.links.new(self.white_bg_mix_node.outputs['Image'], self.output_node_white_bg.inputs[white_background_name])
 
+    if bpy.context.scene.render.engine == 'BLENDER_EEVEE':
+      self.output_node_transparent.file_slots.remove(self.output_node_transparent.inputs[0])
+      self.output_node_transparent.file_slots.new(transparent_name)
+      tree.links.new(self.render_layer_node.outputs['Image'], self.output_node_transparent.inputs[transparent_name])
+
+      self.output_node_black_bg.file_slots.remove(self.output_node_black_bg.inputs[0])
+      self.output_node_black_bg.file_slots.new(black_background_name)
+      tree.links.new(self.black_bg_mix_node.outputs['Image'], self.output_node_black_bg.inputs[black_background_name])
+
+      self.output_node_white_bg.file_slots.remove(self.output_node_white_bg.inputs[0])
+      self.output_node_white_bg.file_slots.new(white_background_name)
+      tree.links.new(self.white_bg_mix_node.outputs['Image'], self.output_node_white_bg.inputs[white_background_name])
 
   def render_turntable(self):
     self.setup_cycles()
@@ -105,7 +149,7 @@ class Render():
     self.setup_evee()
     self.render_textures()
     self.render_wireframe()
-    # self.render_full()
+    self.render_full()
 
   def render_full(self):
     self.setup_cycles()
@@ -239,6 +283,8 @@ class Render():
 
     ouput_node = world.node_tree.nodes.get("World Output")
     world.node_tree.links.new(background_node.outputs['Background'], ouput_node.inputs['Surface'])
+
+    self.setup_compositing_nodes()
 
 class OpenRenderDirectoryOperator(bpy.types.Operator):
     bl_idname = 'postgrammetry.render_open_directory'
