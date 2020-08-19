@@ -118,6 +118,11 @@ def register():
         default='//',
         description="The folder your images will be saved to",
         subtype='DIR_PATH')
+    bpy.types.Scene.render_hdri = bpy.props.StringProperty(
+        name="render_hdri",
+        default='//',
+        description="The hdri used for rendering",
+        subtype='FILE_PATH')
     bpy.types.Scene.turntable_image_count = bpy.props.IntProperty(name='turntable_image_count', default=7)
 
     # resize
