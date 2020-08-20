@@ -24,6 +24,22 @@ def register_rendering():
         name='turntable_image_count',
         default=7)
 
+    bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
+                                                              default=True)
+    bpy.types.Scene.render_texture_maps = bpy.props.BoolProperty(name='render_texture_maps',
+                                                                 default=True)
+    bpy.types.Scene.render_turntable = bpy.props.BoolProperty(name='render_turntable',
+                                                              default=True)
+    bpy.types.Scene.render_full = bpy.props.BoolProperty(name='render_full',
+                                                         default=True)
+
+    bpy.types.Scene.render_transparent = bpy.props.BoolProperty(name='render_transparent',
+                                                                default=True)
+    bpy.types.Scene.render_black_bg = bpy.props.BoolProperty(name='render_black_bg',
+                                                             default=True)
+    bpy.types.Scene.render_white_bg = bpy.props.BoolProperty(name='render_white_bg',
+                                                             default=True)
+
 
 def unregister_rendering():
     for cls in classes:
@@ -31,3 +47,12 @@ def unregister_rendering():
 
     del bpy.types.Scene.turntable_image_count
     del bpy.types.Scene.render_out_path
+
+    del bpy.types.Scene.render_wireframe
+    del bpy.types.Scene.render_texture_maps
+    del bpy.types.Scene.render_turntable
+    del bpy.types.Scene.render_full
+
+    del bpy.types.Scene.render_transparent
+    del bpy.types.Scene.render_black_bg
+    del bpy.types.Scene.render_white_bg
