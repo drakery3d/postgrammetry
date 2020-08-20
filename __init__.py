@@ -1,3 +1,10 @@
+from .decimating import register_decimating, unregister_decimating
+from .exporting import register_exporting, unregister_exporting
+from .resizing import register_resizing, unregister_resizing
+from .rendering import register_rendering, unregister_rendering
+from .baking import register_baking, unregister_baking
+import os
+
 bl_info = {
     'name': 'Postgrammetry',
     'author': 'Florian Ludewig',
@@ -9,14 +16,6 @@ bl_info = {
     'category': 'Automation'
 }
 
-import bpy
-import os
-
-from .baking import register_baking, unregister_baking
-from .rendering import register_rendering, unregister_rendering
-from .resizing import register_resizing, unregister_resizing
-from .exporting import register_exporting, unregister_exporting
-from .decimating import register_decimating, unregister_decimating
 
 def register():
     print("Register Postgrammetry addon")
@@ -27,6 +26,7 @@ def register():
     register_decimating()
     print("Successfully registered Postgrammetry addon")
 
+
 def unregister():
     print("Unregister Postgrammetry addon")
     unregister_decimating()
@@ -35,6 +35,7 @@ def unregister():
     unregister_exporting()
     unregister_baking()
     print("Successfully unregistered Postgrammetry addon")
+
 
 if __name__ == '__main__':
     register()

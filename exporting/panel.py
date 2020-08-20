@@ -14,7 +14,8 @@ class ExportPanel(bpy.types.Panel):
         row = layout.column()
         row.prop(context.scene, 'export_out_path', text='Output')
         row = layout.row()
-        row.operator('postgrammetry.export_open_directory', text='Open directory')
+        row.operator('postgrammetry.export_open_directory',
+                     text='Open directory')
 
         box = layout.box()
         col = box.column(align=True)

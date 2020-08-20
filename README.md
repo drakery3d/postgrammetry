@@ -1,14 +1,12 @@
 # ⚠️ Postgrammetry is still in development
 
-This addon will help you to automate the entire cleanup process for a photo-scanned 3d model:
+This addon helps you to automate the entire cleanup process for photo-scanned 3d models
 
-- Batch bake texture maps
-- Batch resize texture maps
-- Batch decimate nodes
-- Batch export models
-- Batch render preview images
-
-# Setup
+- Baking texture maps
+- Resize texture maps
+- Decimating models
+- Exporting models
+- Rendering preview images
 
 ## Installation
 

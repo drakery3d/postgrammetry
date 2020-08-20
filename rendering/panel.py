@@ -14,7 +14,8 @@ class RenderPanel(bpy.types.Panel):
         row = layout.column()
         row.prop(context.scene, 'render_out_path', text='Output')
         row = layout.row()
-        row.operator('postgrammetry.render_open_directory', text='Open directory')
+        row.operator('postgrammetry.render_open_directory',
+                     text='Open directory')
 
         row = layout.row()
         row.prop(bpy.context.scene.cycles, 'samples')

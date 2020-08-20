@@ -1,5 +1,6 @@
 import bpy
 
+
 class DecimatePanel(bpy.types.Panel):
     bl_label = 'Decimating'
     bl_idname = 'MAIN_PT_batch_decimate'

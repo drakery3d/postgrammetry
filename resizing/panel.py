@@ -14,7 +14,8 @@ class ResizePanel(bpy.types.Panel):
         row = layout.column()
         row.prop(context.scene, 'resize_path', text='')
         row = layout.row()
-        row.operator('postgrammetry.resize_open_directory', text='Open directory')
+        row.operator('postgrammetry.resize_open_directory',
+                     text='Open directory')
 
         row = layout.row()
         row.operator('postgrammetry.resize_textures', text='Resize Textures')
