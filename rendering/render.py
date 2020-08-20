@@ -5,6 +5,7 @@
 import bpy
 import math
 import time
+import os
 
 from ..utils import get_absolute_path, open_os_directory, un_hide, hide
 
@@ -31,6 +32,7 @@ class Render():
 
         self.obj = bpy.context.object
         un_hide(self.obj.name)
+        bpy.context.scene.frame_set(0)
 
         if bpy.context.scene.render_full:
             self.render_full()
@@ -40,6 +42,15 @@ class Render():
             self.render_wireframe()
         if bpy.context.scene.render_turntable:
             self.render_turntable()
+
+        path = get_absolute_path(bpy.context.scene.render_out_path)
+        files = os.listdir(path)
+        for file in files:
+            filename, extension = os.path.splitext(file)
+            if filename.endswith('0000'):
+                new_filename = file.replace('0000', '')
+                os.rename(os.path.join(path, file),
+                          os.path.join(path, new_filename))
 
     def setup_compositing_nodes(self):
         bpy.context.scene.use_nodes = True
@@ -196,7 +207,6 @@ class Render():
         count = 0
         for _ in range(number_of_pics):
             self.obj.rotation_euler[2] += 2 * math.pi / number_of_pics
-            #bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'turntable_' + str(count))
             self.rename_file_out_ms('turntable_' + str(count))
             bpy.ops.render.render(write_still=True)
             count += 1
@@ -204,10 +214,7 @@ class Render():
 
     def render_full(self):
         self.setup_cycles()
-        # TODO denoise (or button to setup compositing nodes)
-        # bpy.context.scene.render.filepath = bpy.path.abspath(bpy.context.scene.render_out_path + 'full')
         bpy.ops.render.render(write_still=True)
-        # TODO rename saved images (remove frame index, last for chars before file extension)
 
     def render_textures(self):
         self.setup_evee()
@@ -334,6 +341,7 @@ class Render():
         world.use_nodes = True
 
         background_node = world.node_tree.nodes.get("Background")
+        background_node.inputs['Strength'].default_value = 20
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
 
