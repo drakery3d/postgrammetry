@@ -10,7 +10,7 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
-        path = bpy.context.scene.bake_out_path
+        path = get_absolute_path(bpy.context.scene.resize_path)
         files = os.listdir(path)
         for file in files:
             filepath = os.path.join(path, file)
@@ -19,7 +19,6 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
                 if extension == '.tif':
                     image = None
                     index = bpy.data.images.find(file)
-                    print('index: ' + str(index))
                     if index >= 0:
                         image = bpy.data.images[index]
                     else:

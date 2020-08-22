@@ -37,14 +37,15 @@ class Render():
 
         if bpy.context.scene.render_full:
             self.render_full()
+        if bpy.context.scene.render_turntable:
+            self.render_turntable()
+
+        if bpy.context.scene.render_matcap:
+            self.render_matcap()
         if bpy.context.scene.render_texture_maps:
             self.render_textures()
         if bpy.context.scene.render_wireframe:
             self.render_wireframe()
-        if bpy.context.scene.render_matcap:
-            self.render_matcap()
-        if bpy.context.scene.render_turntable:
-            self.render_turntable()
         if bpy.context.scene.render_uv_grid:
             self.render_uv_grid()
 
@@ -431,6 +432,7 @@ class Render():
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
         background_node.inputs['Strength'].default_value = 1
         background_node.location = -200, 0
+        background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength
 
         env_texture = world.node_tree.nodes.get("Environment Texture")
         if env_texture == None:
