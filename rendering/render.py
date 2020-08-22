@@ -46,6 +46,8 @@ class Render():
             self.render_matcap()
         if bpy.context.scene.render_turntable:
             self.render_turntable()
+        if bpy.context.scene.render_uv_grid:
+            self.render_uv_grid()
 
         self.setup_cycles()
 
@@ -361,9 +363,42 @@ class Render():
         current_material = self.obj.material_slots[0].material
         self.obj.material_slots[0].material = material
 
+        self.rename_file_out_ms('matcap')
         bpy.ops.render.render(write_still=True)
 
         self.obj.material_slots[0].material = current_material
+
+    def render_uv_grid(self):
+        self.setup_evee()
+
+        material = self.obj.material_slots[0].material
+        nodes = material.node_tree.nodes
+        diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
+        diffuse_shader_node.location = (100, 500)
+
+        ouput_node = nodes.get("Material Output")
+        material.node_tree.links.new(
+            diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
+        shader_node = nodes.get('Principled BSDF')
+
+        image_name = 'uv-grid'
+        image = bpy.data.images.get(image_name)
+        if image is None:
+            bpy.ops.image.new(name=image_name, generated_type='UV_GRID')
+            image = bpy.data.images.get(image_name)
+        image_texture_node = nodes.new('ShaderNodeTexImage')
+        image_texture_node.image = image
+        material.node_tree.links.new(
+            image_texture_node.outputs['Color'], diffuse_shader_node.inputs['Color'])
+
+        self.rename_file_out_ms('uv')
+        bpy.ops.render.render(write_still=True)
+
+        nodes.remove(image_texture_node)
+        principled_bsdf = nodes.get("Principled BSDF")
+        material.node_tree.links.new(
+            principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
+        nodes.remove(diffuse_shader_node)
 
     def setup_cycles(self):
         bpy.context.scene.render.engine = 'CYCLES'
@@ -384,9 +419,12 @@ class Render():
         env_texture = world.node_tree.nodes.get("Environment Texture")
         if env_texture == None:
             env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
-        hdri_image = bpy.data.images.load(bpy.context.scene.render_env_texture)
-        env_texture.image = hdri_image
-        env_texture.location = -500, 0
+            env_texture.location = -500, 0
+
+        if env_texture.image == None:
+            hdri_image = bpy.data.images.load(
+                bpy.context.scene.render_env_texture)
+            env_texture.image = hdri_image
 
         ouput_node = world.node_tree.nodes.get("World Output")
         ouput_node.location = 0, 0
@@ -442,7 +480,12 @@ def on_env_texture_updated(self, context):
     env_texture = world.node_tree.nodes.get("Environment Texture")
     if env_texture == None:
         env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
-    hdri_image = bpy.data.images.load(bpy.context.scene.render_env_texture)
+
+    # TODO don't reload image if it already existsts!
+    filename = os.path.basename(bpy.context.scene.render_env_texture)
+    hdri_image = bpy.data.images.get(filename)
+    if hdri_image is None:
+        hdri_image = bpy.data.images.load(bpy.context.scene.render_env_texture)
     env_texture.image = hdri_image
 
 

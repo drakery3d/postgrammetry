@@ -35,6 +35,9 @@ class RenderPanel(bpy.types.Panel):
         row.prop(context.scene, "render_matcap",
                  icon="OUTLINER_OB_META", text="Matcap")
         row = col.row(align=True)
+        row.prop(context.scene, "render_uv_grid",
+                 icon="UV_DATA", text="UV Grid")
+        row = col.row(align=True)
         row.prop(context.scene, "render_texture_maps",
                  icon="TEXTURE", text="Texture Maps")
         row = col.row(align=True)
