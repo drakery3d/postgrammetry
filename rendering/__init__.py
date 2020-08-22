@@ -34,6 +34,8 @@ def register_rendering():
 
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)
+    bpy.types.Scene.render_matcap = bpy.props.BoolProperty(name='render_matcap',
+                                                           default=True)
     bpy.types.Scene.render_texture_maps = bpy.props.BoolProperty(name='render_texture_maps',
                                                                  default=True)
     bpy.types.Scene.render_turntable = bpy.props.BoolProperty(name='render_turntable',

@@ -42,6 +42,8 @@ class Render():
             self.render_textures()
         if bpy.context.scene.render_wireframe:
             self.render_wireframe()
+        if bpy.context.scene.render_matcap:
+            self.render_matcap()
         if bpy.context.scene.render_turntable:
             self.render_turntable()
 
@@ -313,6 +315,55 @@ class Render():
             principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
         nodes.remove(diffuse_shader_node)
         bpy.context.scene.render.use_freestyle = False
+
+    def render_matcap(self):
+        self.setup_evee()
+        material_name = '__matcap_material'
+        material = bpy.data.materials.get(material_name)
+        if material != None:
+            bpy.data.materials.remove(material)
+
+        material = bpy.data.materials.new(name=material_name)
+        material.use_nodes = True
+        nodes = material.node_tree.nodes
+        shader_node = nodes.get('Principled BSDF')
+        shader_node.inputs['Metallic'].default_value = 1
+        shader_node.inputs['Specular'].default_value = .5
+        shader_node.inputs['Roughness'].default_value = .1
+
+        geometry_node = nodes.new('ShaderNodeNewGeometry')
+        geometry_node.location = -800, 200
+        vector_node = nodes.new('ShaderNodeVectorTransform')
+        vector_node.location = -600, 200
+        vector_node.vector_type = 'NORMAL'
+        vector_node.convert_from = 'OBJECT'
+        vector_node.convert_to = 'CAMERA'
+        mapping_node = nodes.new('ShaderNodeMapping')
+        mapping_node.location = -400, 200
+        mapping_node.inputs['Location'].default_value[0] = .5
+        mapping_node.inputs['Location'].default_value[1] = .5
+        mapping_node.inputs['Scale'].default_value[0] = .5
+        mapping_node.inputs['Scale'].default_value[1] = .25
+        mapping_node.inputs['Scale'].default_value[2] = -3
+        hue_node = nodes.new('ShaderNodeHueSaturation')
+        hue_node.inputs['Saturation'].default_value = 1.1
+        hue_node.location = -200, 200
+
+        material.node_tree.links.new(
+            geometry_node.outputs['Normal'], vector_node.inputs['Vector'])
+        material.node_tree.links.new(
+            vector_node.outputs['Vector'], mapping_node.inputs['Vector'])
+        material.node_tree.links.new(
+            mapping_node.outputs['Vector'], hue_node.inputs['Color'])
+        material.node_tree.links.new(
+            hue_node.outputs['Color'], shader_node.inputs['Base Color'])
+
+        current_material = self.obj.material_slots[0].material
+        self.obj.material_slots[0].material = material
+
+        bpy.ops.render.render(write_still=True)
+
+        self.obj.material_slots[0].material = current_material
 
     def setup_cycles(self):
         bpy.context.scene.render.engine = 'CYCLES'
