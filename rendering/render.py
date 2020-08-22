@@ -1,5 +1,4 @@
 # TODO maybe save images with non-transparent background as jpg
-# TODO make hdri rotation adjustable
 # TODO add sun with sun addon
 
 import bpy
@@ -8,7 +7,7 @@ import math
 import time
 import os
 
-from ..utils import get_absolute_path, open_os_directory, un_hide, hide
+from ..utils import get_absolute_path, open_os_directory, un_hide, hide, deselect_all, hide_all_except, select_obj
 
 
 class BatchRenderOperator(bpy.types.Operator):
@@ -282,6 +281,23 @@ class Render():
 
     def render_wireframe(self):
         self.setup_evee()
+        self.render_wireframe_for_obj(self.obj)
+        # cut off trailing "0" from <object-name_lod0>
+        base_obj_name = self.obj.name[:-1]
+        if bpy.context.scene.render_wireframe_look_for_lods:
+            for o in bpy.data.objects:
+                if self.obj.name != o.name and base_obj_name in o.name:
+                    self.render_wireframe_for_obj(o)
+
+        deselect_all()
+        select_obj(self.obj)
+        hide_all_except(self.obj.name)
+
+    def render_wireframe_for_obj(self, obj):
+        hide_all_except(obj.name)
+        deselect_all()
+        select_obj(obj)
+
         bpy.context.scene.render.use_freestyle = True
         scene = bpy.context.scene
         freestyle = scene.view_layers[0].freestyle_settings
@@ -295,7 +311,7 @@ class Render():
         bpy.data.linestyles["LineStyle"].color = (0, 0, 0)
         bpy.data.linestyles["LineStyle"].thickness = 1.5
 
-        material = self.obj.material_slots[0].material
+        material = obj.material_slots[0].material
         nodes = material.node_tree.nodes
         diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
         diffuse_shader_node.location = (100, 500)
@@ -481,7 +497,6 @@ def on_env_texture_updated(self, context):
     if env_texture == None:
         env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
 
-    # TODO don't reload image if it already existsts!
     filename = os.path.basename(bpy.context.scene.render_env_texture)
     hdri_image = bpy.data.images.get(filename)
     if hdri_image is None:

@@ -11,6 +11,22 @@ def hide(obj_name):
     obj.hide_set(True)
 
 
+def deselect_all():
+    for obj in bpy.context.selected_objects:
+        obj.select_set(False)
+
+
+def hide_all_except(except_obj_name):
+    for obj_name in [obj.name for obj in bpy.data.objects]:
+        hide(obj_name)
+    un_hide(except_obj_name)
+
+
+def select_obj(obj):
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+
+
 def un_hide(obj_name):
     obj = bpy.data.objects.get(obj_name)
     obj.hide_render = False

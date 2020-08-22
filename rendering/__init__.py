@@ -34,6 +34,8 @@ def register_rendering():
 
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)
+    bpy.types.Scene.render_wireframe_look_for_lods = bpy.props.BoolProperty(
+        name='render_wireframe_look_for_lods', default=True)
     bpy.types.Scene.render_matcap = bpy.props.BoolProperty(name='render_matcap',
                                                            default=True)
     bpy.types.Scene.render_uv_grid = bpy.props.BoolProperty(name='render_uv_grid',
@@ -64,6 +66,7 @@ def unregister_rendering():
     del bpy.types.Scene.render_bg_strength
 
     del bpy.types.Scene.render_wireframe
+    del bpy.types.Scene.render_wireframe_look_for_lods
     del bpy.types.Scene.render_texture_maps
     del bpy.types.Scene.render_matcap
     del bpy.types.Scene.render_uv_grid
