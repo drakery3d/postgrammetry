@@ -1,7 +1,10 @@
+# TODO background option for environment
+# TODO output resolution & scale sliders
+
 import bpy
 
 from .panel import RenderPanel
-from .render import BatchRenderOperator, OpenRenderDirectoryOperator
+from .render import BatchRenderOperator, OpenRenderDirectoryOperator, on_env_texture_updated, on_bg_strength_updated
 
 classes = (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
 
@@ -24,6 +27,11 @@ def register_rendering():
         name='turntable_image_count',
         default=7)
 
+    bpy.types.Scene.render_env_texture = bpy.props.StringProperty(
+        name='render_env_texture', subtype='FILE_PATH', update=on_env_texture_updated)
+    bpy.types.Scene.render_bg_strength = bpy.props.FloatProperty(
+        name='render_bg_strength', default=1.0, update=on_bg_strength_updated)
+
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)
     bpy.types.Scene.render_texture_maps = bpy.props.BoolProperty(name='render_texture_maps',
@@ -31,7 +39,7 @@ def register_rendering():
     bpy.types.Scene.render_turntable = bpy.props.BoolProperty(name='render_turntable',
                                                               default=True)
     bpy.types.Scene.render_full = bpy.props.BoolProperty(name='render_full',
-                                                         default=True)
+                                                         default=False)
 
     bpy.types.Scene.render_transparent = bpy.props.BoolProperty(name='render_transparent',
                                                                 default=True)
@@ -47,6 +55,9 @@ def unregister_rendering():
 
     del bpy.types.Scene.turntable_image_count
     del bpy.types.Scene.render_out_path
+
+    del bpy.types.Scene.render_env_texture
+    del bpy.types.Scene.render_bg_strength
 
     del bpy.types.Scene.render_wireframe
     del bpy.types.Scene.render_texture_maps

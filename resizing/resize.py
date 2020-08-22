@@ -31,7 +31,7 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
     def process(self, image):
         image_size = image.size[0]
         if image_size != image.size[1]:
-            # TODO throw error or do nothing?
+            # FIXME show error popup
             print("image is not a square... skip")
             return
 
@@ -55,7 +55,7 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
         temp = bpy.data.images[image.name].copy()
         temp.scale(size, size)
         temp.file_format = 'JPEG'
-        # TODO how to configure compression?
+        # FIXME how to configure compression?
         # TODO also save as tif!?
         path = bpy.context.scene.bake_out_path
         temp.filepath_raw = os.path.join(path, f'{name}_{str(size)}px.jpg')

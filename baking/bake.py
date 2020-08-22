@@ -210,7 +210,7 @@ class Bake():
         resizes = self.output_sizes.copy()
         resizes.remove(max(self.output_sizes))
         if len(resizes) >= 1:
-            # TODO don't get image from self.bake_image, but rather from type?!
+            # FIXME don't get image from self.bake_image, but rather from type?!
             master_copy = bpy.data.images.get(self.bake_image.name).copy()
             master_copy.name = f'{self.low}_{type}_copy.tif'
 
@@ -228,7 +228,7 @@ class Bake():
                 filepath_raw = f'{filepath_raw}.tif'
 
                 resized.save()
-        # TODO delete copied images
+        # FIXME delete copied images
 
     def get_size_abbreviation(self, size_in_pixels):
         if size_in_pixels == 2**11:

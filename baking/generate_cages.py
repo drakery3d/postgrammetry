@@ -14,7 +14,7 @@ class GnerateCagesOperator(bpy.types.Operator):
             obj.name for obj in bpy.data.collections[
                 context.scene.lowpoly_bake_obj].all_objects
         ]
-        # TODO try with multiple objects
+        # FIXME try with multiple objects
         for obj_name in low_objects_names:
             self.delete_old_cage(obj_name)
             self.generate_cage(obj_name)

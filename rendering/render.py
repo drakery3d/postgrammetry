@@ -1,8 +1,9 @@
-# TODO python code formatter
-# TODO save images with non-transparent background as jpg
+# TODO maybe save images with non-transparent background as jpg
 # TODO make hdri rotation adjustable
+# TODO add sun with sun addon
 
 import bpy
+import addon_utils
 import math
 import time
 import os
@@ -25,6 +26,7 @@ class BatchRenderOperator(bpy.types.Operator):
 
 class Render():
     def __init__(self):
+        addon_utils.enable('sun_position', default_set=True, persistent=True)
         bpy.context.scene.use_nodes = True
 
         for obj_name in [obj.name for obj in bpy.data.objects]:
@@ -42,6 +44,8 @@ class Render():
             self.render_wireframe()
         if bpy.context.scene.render_turntable:
             self.render_turntable()
+
+        self.setup_cycles()
 
         path = get_absolute_path(bpy.context.scene.render_out_path)
         files = os.listdir(path)
@@ -319,16 +323,27 @@ class Render():
         bpy.context.scene.cycles.device = 'GPU'
         world = bpy.context.scene.world
         world.use_nodes = True
-        # TODO hdri user input with rotation
-        # TODO add sun with sun addon
+
+        background_node = world.node_tree.nodes.get("Background")
+        if background_node == None:
+            background_node = world.node_tree.nodes.new('ShaderNodeBackground')
+        background_node.inputs['Strength'].default_value = 1
+        background_node.location = -200, 0
 
         env_texture = world.node_tree.nodes.get("Environment Texture")
         if env_texture == None:
             env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
+        hdri_image = bpy.data.images.load(bpy.context.scene.render_env_texture)
+        env_texture.image = hdri_image
+        env_texture.location = -500, 0
 
         ouput_node = world.node_tree.nodes.get("World Output")
+        ouput_node.location = 0, 0
+
         world.node_tree.links.new(
-            env_texture.outputs['Color'], ouput_node.inputs['Surface'])
+            env_texture.outputs['Color'], background_node.inputs['Color'])
+        world.node_tree.links.new(
+            background_node.outputs['Background'], ouput_node.inputs['Surface'])
 
         self.setup_compositing_nodes()
 
@@ -341,11 +356,18 @@ class Render():
         world.use_nodes = True
 
         background_node = world.node_tree.nodes.get("Background")
-        background_node.inputs['Strength'].default_value = 20
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
 
+        for link in background_node.inputs['Color'].links:
+            world.node_tree.links.remove(link)
+        background_node.inputs['Color'].default_value = (1, 1, 1, 1)
+
+        background_node.location = -200, 0
+
         ouput_node = world.node_tree.nodes.get("World Output")
+        ouput_node.location = 0, 0
+
         world.node_tree.links.new(
             background_node.outputs['Background'], ouput_node.inputs['Surface'])
 
@@ -361,3 +383,22 @@ class OpenRenderDirectoryOperator(bpy.types.Operator):
         path = get_absolute_path(bpy.context.scene.render_out_path)
         open_os_directory(path)
         return {'FINISHED'}
+
+
+def on_env_texture_updated(self, context):
+    world = bpy.context.scene.world
+    world.use_nodes = True
+    env_texture = world.node_tree.nodes.get("Environment Texture")
+    if env_texture == None:
+        env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
+    hdri_image = bpy.data.images.load(bpy.context.scene.render_env_texture)
+    env_texture.image = hdri_image
+
+
+def on_bg_strength_updated(self, context):
+    world = bpy.context.scene.world
+    world.use_nodes = True
+    background_node = world.node_tree.nodes.get("Background")
+    if background_node == None:
+        background_node = world.node_tree.nodes.new('ShaderNodeBackground')
+    background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength

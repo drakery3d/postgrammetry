@@ -15,6 +15,14 @@ class RenderPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(bpy.context.scene.cycles, 'samples')
 
+        row = layout.row()
+        row.prop(context.scene, 'render_env_texture', text='HDRI')
+        row = layout.row()
+        row.prop(context.scene, 'render_bg_strength', text='Strength')
+        row = layout.row()
+        # TODO use "postgrammetry_properties.<someting>" too (may also be easier to unregister addon)
+        row.prop(context.scene.sun_pos_properties, 'hdr_azimuth')
+
         # modes
         row = layout.row()
         row.label(text='Modes')
