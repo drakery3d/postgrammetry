@@ -2,11 +2,13 @@
 # TODO output resolution & scale sliders
 
 import bpy
+import math
 
 from .panel import RenderPanel
-from .render import BatchRenderOperator, OpenRenderDirectoryOperator, on_env_texture_updated, on_bg_strength_updated
+from .render import BatchRenderOperator, OpenRenderDirectoryOperator, RenderSetupOperator, on_env_texture_updated, on_bg_strength_updated, on_turntable_rotation_updated
 
-classes = (RenderPanel, BatchRenderOperator, OpenRenderDirectoryOperator)
+classes = (RenderPanel, BatchRenderOperator,
+           OpenRenderDirectoryOperator, RenderSetupOperator)
 
 
 def register_rendering():
@@ -31,6 +33,9 @@ def register_rendering():
         name='render_env_texture', subtype='FILE_PATH', update=on_env_texture_updated)
     bpy.types.Scene.render_bg_strength = bpy.props.FloatProperty(
         name='render_bg_strength', default=1.0, update=on_bg_strength_updated)
+
+    bpy.types.Scene.render_turntable_rotation = bpy.props.FloatProperty(
+        name='render_turntable_rotation', default=0, subtype='ANGLE', step=30, soft_min=0, soft_max=math.radians(360), update=on_turntable_rotation_updated)
 
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)

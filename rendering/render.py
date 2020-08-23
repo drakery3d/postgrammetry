@@ -17,16 +17,72 @@ class BatchRenderOperator(bpy.types.Operator):
 
     def execute(self, context):
         start_time = time.time()
-        Render()
+        render = Render()
+        render.render()
         end_time = time.time()
         print("Rendering done in " + str(end_time - start_time) + " seconds")
         return {'FINISHED'}
 
 
+class RenderSetupOperator(bpy.types.Operator):
+    bl_idname = 'postgrammetry.render_setup'
+    bl_label = 'setup render'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        setup_addon()
+        setup_defaults()
+        return {'FINISHED'}
+
+
+def setup_defaults():
+    bpy.context.scene.render.resolution_percentage = 200
+    bpy.context.scene.cycles.samples = 32
+    bpy.context.space_data.shading.use_scene_world = True
+    bpy.context.space_data.shading.type = 'MATERIAL'
+
+    camera_name = 'Camera'
+    cam = bpy.data.cameras.get(camera_name)
+    if cam == None:
+        cam = bpy.data.cameras.new(camera_name)
+    cam_obj = bpy.data.objects.get(camera_name)
+    if cam_obj == None:
+        cam_obj = bpy.data.objects.new(camera_name, cam)
+        bpy.context.scene.collection.objects.link(cam_obj)
+    if bpy.context.region_data.view_perspective in {'PERSP', 'ORTHO'}:
+        bpy.context.region_data.view_perspective = 'CAMERA'
+    bpy.context.space_data.lock_camera = True
+    bpy.context.scene.camera = cam_obj
+    cam_obj.data.clip_start = 0.001
+    bpy.ops.view3d.view_all()
+
+    sun_name = 'Sun'
+    sun = bpy.data.lights.get(sun_name)
+    if sun == None:
+        sun = bpy.data.lights.new(name=sun_name, type='SUN')
+    sun_obj = bpy.data.objects.get(sun_name)
+    if sun_obj == None:
+        sun_obj = bpy.data.objects.new(
+            name=sun_name, object_data=sun)
+    bpy.context.collection.objects.link(sun_obj)
+    bpy.context.view_layer.objects.active = sun_obj
+
+    bpy.context.scene.sun_pos_properties.sun_object = sun_obj
+
+
+def setup_addon():
+    addon_utils.enable('sun_position', default_set=True, persistent=True)
+    bpy.context.scene.sun_pos_properties.usage_mode = 'HDR'
+    bpy.context.scene.sun_pos_properties.bind_to_sun = True
+    bpy.context.scene.use_nodes = True
+    render = Render()
+    render.setup_cycles()
+
+
+# TODO use of a render class might be useless here
 class Render():
-    def __init__(self):
-        addon_utils.enable('sun_position', default_set=True, persistent=True)
-        bpy.context.scene.use_nodes = True
+    def render(self):
+        setup_addon()
 
         for obj_name in [obj.name for obj in bpy.data.objects]:
             hide(obj_name)
@@ -439,7 +495,7 @@ class Render():
             env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
             env_texture.location = -500, 0
 
-        if env_texture.image == None:
+        if env_texture.image == None and bpy.context.scene.render_env_texture != '':
             hdri_image = bpy.data.images.load(
                 bpy.context.scene.render_env_texture)
             env_texture.image = hdri_image
@@ -513,3 +569,8 @@ def on_bg_strength_updated(self, context):
     if background_node == None:
         background_node = world.node_tree.nodes.new('ShaderNodeBackground')
     background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength
+
+
+def on_turntable_rotation_updated(self, context):
+    obj = bpy.context.object
+    obj.rotation_euler[2] = bpy.context.scene.render_turntable_rotation

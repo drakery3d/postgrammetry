@@ -11,9 +11,18 @@ class RenderPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
+        row = layout.row()
+        row.operator('postgrammetry.render_setup', text='Setup')
+        layout.separator()
+
         # render settings
         row = layout.row()
         row.prop(bpy.context.scene.cycles, 'samples')
+        row = layout.row()
+        row.prop(bpy.context.scene.render, 'resolution_x')
+        row.prop(bpy.context.scene.render, 'resolution_y')
+        row = layout.row()
+        row.prop(bpy.context.scene.render, 'resolution_percentage')
 
         row = layout.row()
         row.prop(context.scene, 'render_env_texture', text='HDRI')
@@ -47,19 +56,22 @@ class RenderPanel(bpy.types.Panel):
         row = col.row(align=True)
 
         row = col.row(align=True)
-        row.prop(context.scene, "render_turntable",
-                 icon="FILE_REFRESH", text="Turntable")
-        if bpy.context.scene.render_turntable:
-            row.prop(context.scene, 'turntable_image_count',
-                     text="Count")
-
-        row = col.row(align=True)
         row.prop(context.scene, "render_wireframe",
                  icon="SHADING_WIRE", text="Wireframe")
         if bpy.context.scene.render_wireframe:
             row.prop(context.scene,
                      'render_wireframe_look_for_lods',
                      text='Search LODs')
+
+        row = col.row(align=True)
+        row.prop(context.scene, "render_turntable",
+                 icon="FILE_REFRESH", text="Turntable")
+        if bpy.context.scene.render_turntable:
+            row.prop(context.scene, 'turntable_image_count',
+                     text="Count")
+            row = layout.row()
+            row.prop(context.scene, 'render_turntable_rotation',
+                     text='Preview Rotation')
 
         # background modes
         row = layout.row()
