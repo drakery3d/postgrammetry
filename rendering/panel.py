@@ -25,6 +25,11 @@ class RenderPanel(bpy.types.Panel):
         row.prop(bpy.context.scene.render, 'resolution_percentage')
 
         row = layout.row()
+        row.prop(bpy.context.scene, 'render_contrast', text="Contrast")
+        row = layout.row()
+        row.prop(bpy.context.scene, 'render_saturation', text="Saturation")
+
+        row = layout.row()
         row.prop(context.scene, 'render_env_texture', text='HDRI')
         row = layout.row()
         row.prop(context.scene, 'render_bg_strength', text='Strength')

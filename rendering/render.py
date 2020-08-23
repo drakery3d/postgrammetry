@@ -17,7 +17,6 @@ class BatchRenderOperator(bpy.types.Operator):
 
     def execute(self, context):
         start_time = time.time()
-        render = Render()
         render.render()
         end_time = time.time()
         print("Rendering done in " + str(end_time - start_time) + " seconds")
@@ -33,50 +32,6 @@ class RenderSetupOperator(bpy.types.Operator):
         setup_addon()
         setup_defaults()
         return {'FINISHED'}
-
-
-def setup_defaults():
-    bpy.context.scene.render.resolution_percentage = 200
-    bpy.context.scene.cycles.samples = 32
-    bpy.context.space_data.shading.use_scene_world = True
-    bpy.context.space_data.shading.type = 'MATERIAL'
-
-    camera_name = 'Camera'
-    cam = bpy.data.cameras.get(camera_name)
-    if cam == None:
-        cam = bpy.data.cameras.new(camera_name)
-    cam_obj = bpy.data.objects.get(camera_name)
-    if cam_obj == None:
-        cam_obj = bpy.data.objects.new(camera_name, cam)
-        bpy.context.scene.collection.objects.link(cam_obj)
-    if bpy.context.region_data.view_perspective in {'PERSP', 'ORTHO'}:
-        bpy.context.region_data.view_perspective = 'CAMERA'
-    bpy.context.space_data.lock_camera = True
-    bpy.context.scene.camera = cam_obj
-    cam_obj.data.clip_start = 0.001
-    bpy.ops.view3d.view_all()
-
-    sun_name = 'Sun'
-    sun = bpy.data.lights.get(sun_name)
-    if sun == None:
-        sun = bpy.data.lights.new(name=sun_name, type='SUN')
-    sun_obj = bpy.data.objects.get(sun_name)
-    if sun_obj == None:
-        sun_obj = bpy.data.objects.new(
-            name=sun_name, object_data=sun)
-    bpy.context.collection.objects.link(sun_obj)
-    bpy.context.view_layer.objects.active = sun_obj
-
-    bpy.context.scene.sun_pos_properties.sun_object = sun_obj
-
-
-def setup_addon():
-    addon_utils.enable('sun_position', default_set=True, persistent=True)
-    bpy.context.scene.sun_pos_properties.usage_mode = 'HDR'
-    bpy.context.scene.sun_pos_properties.bind_to_sun = True
-    bpy.context.scene.use_nodes = True
-    render = Render()
-    render.setup_cycles()
 
 
 # TODO use of a render class might be useless here
@@ -128,6 +83,19 @@ class Render():
         if bpy.context.scene.render.engine == 'CYCLES':
             self.denoise_node = tree.nodes.new(type='CompositorNodeDenoise')
             self.denoise_node.location = 300, 0
+
+            self.hue_sat_node = tree.nodes.new('CompositorNodeHueSat')
+            self.hue_sat_node.location = 500, 0
+            tree.links.new(
+                self.denoise_node.outputs['Image'], self.hue_sat_node.inputs['Image'])
+            self.bright_contrast_node = tree.nodes.new(
+                'CompositorNodeBrightContrast')
+            self.bright_contrast_node.location = 700, 0
+            tree.links.new(
+                self.hue_sat_node.outputs['Image'], self.bright_contrast_node.inputs['Image'])
+            render.hue_sat_node.inputs['Saturation'].default_value = bpy.context.scene.render_saturation
+            render.bright_contrast_node.inputs['Contrast'].default_value = bpy.context.scene.render_contrast
+
             tree.links.new(
                 self.denoise_node.inputs['Image'], self.render_layer_node.outputs['Noisy Image'])
             tree.links.new(
@@ -137,38 +105,38 @@ class Render():
             if bpy.context.scene.render_transparent:
                 self.output_node_transparent = tree.nodes.new(
                     type='CompositorNodeOutputFile')
-                self.output_node_transparent.location = 500, 0
+                self.output_node_transparent.location = 900, 0
                 self.output_node_transparent.base_path = bpy.context.scene.render_out_path
 
             if bpy.context.scene.render_black_bg:
                 self.black_bg_mix_node = tree.nodes.new(
                     type='CompositorNodeMixRGB')
-                self.black_bg_mix_node.location = 500, -300
+                self.black_bg_mix_node.location = 700, -200
                 tree.links.new(
                     self.render_layer_node.outputs['Alpha'], self.black_bg_mix_node.inputs[0])
                 tree.links.new(
-                    self.denoise_node.outputs['Image'], self.black_bg_mix_node.inputs[2])
+                    self.bright_contrast_node.outputs['Image'], self.black_bg_mix_node.inputs[2])
                 black = 0.0012
                 self.black_bg_mix_node.inputs[1].default_value = (
                     black, black, black, 1)
                 self.output_node_black_bg = tree.nodes.new(
                     type='CompositorNodeOutputFile')
-                self.output_node_black_bg.location = 700, -300
+                self.output_node_black_bg.location = 900, -200
                 self.output_node_black_bg.base_path = bpy.context.scene.render_out_path
 
             if bpy.context.scene.render_white_bg:
                 self.white_bg_mix_node = tree.nodes.new(
                     type='CompositorNodeMixRGB')
-                self.white_bg_mix_node.location = 500, -600
+                self.white_bg_mix_node.location = 700, -400
                 tree.links.new(
                     self.render_layer_node.outputs['Alpha'], self.white_bg_mix_node.inputs[0])
                 tree.links.new(
-                    self.denoise_node.outputs['Image'], self.white_bg_mix_node.inputs[2])
+                    self.bright_contrast_node.outputs['Image'], self.white_bg_mix_node.inputs[2])
                 self.white_bg_mix_node.inputs[1].default_value = (
                     1, 1, 1, 1)  # TODO this isn't really white
                 self.output_node_white_bg = tree.nodes.new(
                     type='CompositorNodeOutputFile')
-                self.output_node_white_bg.location = 700, -600
+                self.output_node_white_bg.location = 900, -400
                 self.output_node_white_bg.base_path = bpy.context.scene.render_out_path
 
         if bpy.context.scene.render.engine == 'BLENDER_EEVEE':
@@ -227,7 +195,7 @@ class Render():
                     self.output_node_transparent.inputs[0])
                 self.output_node_transparent.file_slots.new(transparent_name)
                 tree.links.new(
-                    self.denoise_node.outputs['Image'], self.output_node_transparent.inputs[transparent_name])
+                    self.bright_contrast_node.outputs['Image'], self.output_node_transparent.inputs[transparent_name])
 
             if bpy.context.scene.render_black_bg:
                 self.output_node_black_bg.file_slots.remove(
@@ -574,3 +542,70 @@ def on_bg_strength_updated(self, context):
 def on_turntable_rotation_updated(self, context):
     obj = bpy.context.object
     obj.rotation_euler[2] = bpy.context.scene.render_turntable_rotation
+
+
+def on_saturation_updated():
+    print('heljo')
+
+
+def on_contrast_updated():
+    print('heljo')
+
+
+def setup_defaults():
+    bpy.context.scene.render.resolution_percentage = 200
+    bpy.context.scene.cycles.samples = 32
+    bpy.context.space_data.shading.use_scene_world = True
+    bpy.context.space_data.shading.type = 'MATERIAL'
+
+    camera_name = 'Camera'
+    cam = bpy.data.cameras.get(camera_name)
+    if cam == None:
+        cam = bpy.data.cameras.new(camera_name)
+    cam_obj = bpy.data.objects.get(camera_name)
+    if cam_obj == None:
+        cam_obj = bpy.data.objects.new(camera_name, cam)
+        bpy.context.scene.collection.objects.link(cam_obj)
+    if bpy.context.region_data.view_perspective in {'PERSP', 'ORTHO'}:
+        bpy.context.region_data.view_perspective = 'CAMERA'
+    bpy.context.space_data.lock_camera = True
+    bpy.context.scene.camera = cam_obj
+    cam_obj.data.clip_start = 0.001
+
+    bpy.ops.view3d.view_selected()
+
+    sun_name = 'Sun'
+    sun = bpy.data.lights.get(sun_name)
+    if sun == None:
+        sun = bpy.data.lights.new(name=sun_name, type='SUN')
+    sun_obj = bpy.data.objects.get(sun_name)
+    if sun_obj == None:
+        sun_obj = bpy.data.objects.new(
+            name=sun_name, object_data=sun)
+        bpy.context.collection.objects.link(sun_obj)
+        bpy.context.view_layer.objects.active = sun_obj
+
+        bpy.context.scene.sun_pos_properties.sun_object = sun_obj
+
+
+def setup_addon():
+    addon_utils.enable('sun_position', default_set=True, persistent=True)
+    bpy.context.scene.sun_pos_properties.usage_mode = 'HDR'
+    bpy.context.scene.sun_pos_properties.bind_to_sun = True
+    bpy.context.scene.use_nodes = True
+    render.setup_cycles()
+
+
+def on_contrast_updated(self, context):
+    if not hasattr(render, 'bright_contrast_node'):
+        render.setup_cycles()
+    render.bright_contrast_node.inputs['Contrast'].default_value = bpy.context.scene.render_contrast
+
+
+def on_saturation_updated(self, context):
+    if not hasattr(render, 'hue_sat_node'):
+        render.setup_cycles()
+    render.hue_sat_node.inputs['Saturation'].default_value = bpy.context.scene.render_saturation
+
+
+render = Render()

@@ -1,11 +1,10 @@
 # TODO background option for environment
-# TODO output resolution & scale sliders
 
 import bpy
 import math
 
 from .panel import RenderPanel
-from .render import BatchRenderOperator, OpenRenderDirectoryOperator, RenderSetupOperator, on_env_texture_updated, on_bg_strength_updated, on_turntable_rotation_updated
+from .render import BatchRenderOperator, OpenRenderDirectoryOperator, RenderSetupOperator, on_env_texture_updated, on_bg_strength_updated, on_turntable_rotation_updated, on_contrast_updated, on_saturation_updated
 
 classes = (RenderPanel, BatchRenderOperator,
            OpenRenderDirectoryOperator, RenderSetupOperator)
@@ -36,6 +35,11 @@ def register_rendering():
 
     bpy.types.Scene.render_turntable_rotation = bpy.props.FloatProperty(
         name='render_turntable_rotation', default=0, subtype='ANGLE', step=30, soft_min=0, soft_max=math.radians(360), update=on_turntable_rotation_updated)
+
+    bpy.types.Scene.render_contrast = bpy.props.FloatProperty(
+        name='render_contrast', default=0.0, step=0.1, soft_min=-3, soft_max=3, update=on_contrast_updated)
+    bpy.types.Scene.render_saturation = bpy.props.FloatProperty(
+        name='render_saturation', default=1.0, step=0.1, soft_min=0, soft_max=3, update=on_saturation_updated)
 
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)
@@ -69,6 +73,8 @@ def unregister_rendering():
 
     del bpy.types.Scene.render_env_texture
     del bpy.types.Scene.render_bg_strength
+    del bpy.types.Scene.render_contrast
+    del bpy.types.Scene.render_saturation
 
     del bpy.types.Scene.render_wireframe
     del bpy.types.Scene.render_wireframe_look_for_lods
