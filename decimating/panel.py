@@ -12,6 +12,12 @@ class DecimatePanel(bpy.types.Panel):
         layout = self.layout
 
         row = layout.column()
+        row = layout.row()
+        row.prop(context.scene, 'decimate_count',
+                 text="Iterations")
+        row = layout.row()
+        row.prop(context.scene, 'decimate_ratio',
+                 text="Ratio")
 
         row = layout.row()
         row.operator('postgrammetry.decimate', text='Decimate')
