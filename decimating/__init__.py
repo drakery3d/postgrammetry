@@ -12,7 +12,8 @@ def register_decimating():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.postgrammetry_decimate = bpy.props.PointerProperty(type=DecimateSettings)
+    bpy.types.Scene.postgrammetry_decimate = bpy.props.PointerProperty(
+        type=DecimateSettings)
 
 
 def unregister_decimating():
