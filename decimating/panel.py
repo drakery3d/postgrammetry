@@ -1,23 +1,24 @@
 import bpy
 
+from ..constants import addon_id, panel, decimate_idname
+
 
 class DecimatePanel(bpy.types.Panel):
-    bl_label = 'Decimating'
-    bl_idname = 'MAIN_PT_batch_decimate'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Postgrammetry'
+    bl_idname = f'VIEW3D_PT_{decimate_idname}'
+    bl_label = 'Decimation'
+    bl_space_type = panel['space_type']
+    bl_region_type = panel['region_type']
+    bl_category = panel['category']
 
     def draw(self, context):
-        layout = self.layout
+        settings = context.scene.postgrammetry_decimate
 
-        row = layout.column()
-        row = layout.row()
-        row.prop(context.scene, 'decimate_count',
-                 text="Iterations")
-        row = layout.row()
-        row.prop(context.scene, 'decimate_ratio',
-                 text="Ratio")
+        row = self.layout.column()
+        row = self.layout.row()
+        row.prop(settings, 'iterations', text='Iterations')
 
-        row = layout.row()
-        row.operator('postgrammetry.decimate', text='Decimate')
+        row = self.layout.row()
+        row.prop(settings, 'ratio', text='Ratio')
+
+        row = self.layout.row()
+        row.operator(f'{addon_id}.{decimate_idname}')

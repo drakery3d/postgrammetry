@@ -43,13 +43,13 @@ class BakePanel(bpy.types.Panel):
         box = layout.box()
         col = box.column(align=True)
         row = col.row(align=True)
-        row.prop(context.scene, "bake_albedo", icon="BLANK1", text="Albedo")
+        row.prop(context.scene, 'bake_albedo', icon='BLANK1', text='Albedo')
         row = col.row(align=True)
-        row.prop(context.scene, "bake_ao", icon="BLANK1", text="AO")
+        row.prop(context.scene, 'bake_ao', icon='BLANK1', text='AO')
         if context.scene.bake_ao:
-            row.prop(context.scene, "ao_samples", text="")
+            row.prop(context.scene, 'ao_samples', text='')
         row = col.row(align=True)
-        row.prop(context.scene, "bake_normal", icon="BLANK1", text="Normal")
+        row.prop(context.scene, 'bake_normal', icon='BLANK1', text='Normal')
 
         # output
         row = layout.column()
@@ -60,10 +60,10 @@ class BakePanel(bpy.types.Panel):
         box = layout.box()
         col = box.column(align=True)
         row = col.row(align=True)
-        row.prop(context.scene, "bake_size_2k", icon="BLANK1", text="2k")
-        row.prop(context.scene, "bake_size_4k", icon="BLANK1", text="4k")
-        row.prop(context.scene, "bake_size_8k", icon="BLANK1", text="8k")
-        row.prop(context.scene, "bake_size_16k", icon="BLANK1", text="16k")
+        row.prop(context.scene, 'bake_size_2k', icon='BLANK1', text='2k')
+        row.prop(context.scene, 'bake_size_4k', icon='BLANK1', text='4k')
+        row.prop(context.scene, 'bake_size_8k', icon='BLANK1', text='8k')
+        row.prop(context.scene, 'bake_size_16k', icon='BLANK1', text='16k')
         row = col.row(align=True)
 
         # bake

@@ -34,9 +34,9 @@ def register_baking():
         default=True)
 
     bpy.types.Scene.bake_out_path = bpy.props.StringProperty(
-        name="bake_out_path",
+        name='bake_out_path',
         default='//',
-        description="The folder your maps will be saved to",
+        description='The folder your maps will be saved to',
         subtype='DIR_PATH')
 
     bpy.types.Scene.ao_samples = bpy.props.IntProperty(
@@ -45,9 +45,9 @@ def register_baking():
         default=64)
 
     bpy.types.Scene.output_format = bpy.props.StringProperty(
-        name="output_format",
+        name='output_format',
         default='TIFF',
-        description="Format the textures will be saved as")
+        description='Format the textures will be saved as')
 
     bpy.types.Scene.baking_done = bpy.props.BoolProperty(name='baking_done',
                                                          default=False)

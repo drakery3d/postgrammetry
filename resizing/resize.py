@@ -31,7 +31,7 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
         image_size = image.size[0]
         if image_size != image.size[1]:
             # FIXME show error popup
-            print("image is not a square... skip")
+            print('image is not a square... skip')
             return
 
         SMALLEST_SIZE = 2**11  # 2048

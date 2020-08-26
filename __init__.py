@@ -18,23 +18,23 @@ bl_info = {
 
 
 def register():
-    print("Register Postgrammetry addon")
+    print('Register Postgrammetry addon')
     register_baking()
     register_exporting()
     register_resizing()
     register_rendering()
     register_decimating()
-    print("Successfully registered Postgrammetry addon")
+    print('Successfully registered Postgrammetry addon')
 
 
 def unregister():
-    print("Unregister Postgrammetry addon")
+    print('Unregister Postgrammetry addon')
     unregister_decimating()
     unregister_rendering()
     unregister_resizing()
     unregister_exporting()
     unregister_baking()
-    print("Successfully unregistered Postgrammetry addon")
+    print('Successfully unregistered Postgrammetry addon')
 
 
 if __name__ == '__main__':

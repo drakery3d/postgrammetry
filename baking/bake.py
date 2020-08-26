@@ -114,7 +114,7 @@ class Bake():
         image.reload()
 
         albedo_texture_node.location = (-300, 300)
-        principled = self.nodes.get("Principled BSDF")
+        principled = self.nodes.get('Principled BSDF')
         self.material.node_tree.links.new(
             albedo_texture_node.outputs['Color'],
             principled.inputs['Base Color'])
@@ -135,7 +135,7 @@ class Bake():
                                           normal_map_node.inputs['Color'])
         normal_map_node.location = (-200, -50)
 
-        principled = self.nodes.get("Principled BSDF")
+        principled = self.nodes.get('Principled BSDF')
         self.material.node_tree.links.new(normal_map_node.outputs['Normal'],
                                           principled.inputs['Normal'])
 

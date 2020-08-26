@@ -57,12 +57,12 @@ def get_absolute_path(relative_path):
 
 
 def open_os_directory(path):
-    if platform.system() == "Windows":
+    if platform.system() == 'Windows':
         os.startfile(path)
-    elif platform.system() == "Darwin":
-        subprocess.Popen(["open", path])
+    elif platform.system() == 'Darwin':
+        subprocess.Popen(['open', path])
     else:
-        subprocess.Popen(["xdg-open", path])
+        subprocess.Popen(['xdg-open', path])
 
 
 def copy_object(source_obj, obj_copy_name):

@@ -12,9 +12,9 @@ def register_resizing():
         bpy.utils.register_class(cls)
 
     bpy.types.Scene.resize_path = bpy.props.StringProperty(
-        name="resize_path",
+        name='resize_path',
         default='//',
-        description="The directory your source images are located",
+        description='The directory your source images are located',
         subtype='DIR_PATH')
 
 

@@ -19,7 +19,7 @@ class BatchRenderOperator(bpy.types.Operator):
         start_time = time.time()
         render.render()
         end_time = time.time()
-        print("Rendering done in " + str(end_time - start_time) + " seconds")
+        print('Rendering done in ' + str(end_time - start_time) + ' seconds')
         return {'FINISHED'}
 
 
@@ -260,7 +260,7 @@ class Render():
         diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
         diffuse_shader_node.location = (100, 500)
 
-        ouput_node = nodes.get("Material Output")
+        ouput_node = nodes.get('Material Output')
         material.node_tree.links.new(
             diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
 
@@ -284,7 +284,7 @@ class Render():
             bpy.data.images.remove(image)
             nodes.remove(image_texture_node)
 
-        principled_bsdf = nodes.get("Principled BSDF")
+        principled_bsdf = nodes.get('Principled BSDF')
         material.node_tree.links.new(
             principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
         nodes.remove(diffuse_shader_node)
@@ -307,7 +307,7 @@ class Render():
     def render_wireframe(self):
         self.setup_evee()
         self.render_wireframe_for_obj(self.obj)
-        # cut off trailing "0" from <object-name_lod0>
+        # cut off trailing '0' from <object-name_lod0>
         base_obj_name = self.obj.name[:-1]
         if bpy.context.scene.render_wireframe_look_for_lods:
             for o in bpy.data.objects:
@@ -333,15 +333,15 @@ class Render():
         linestyle.select_crease = False
         linestyle.select_edge_mark = True
 
-        bpy.data.linestyles["LineStyle"].color = (0, 0, 0)
-        bpy.data.linestyles["LineStyle"].thickness = 1.5
+        bpy.data.linestyles['LineStyle'].color = (0, 0, 0)
+        bpy.data.linestyles['LineStyle'].thickness = 1.5
 
         material = obj.material_slots[0].material
         nodes = material.node_tree.nodes
         diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
         diffuse_shader_node.location = (100, 500)
         diffuse_shader_node.inputs['Color'].default_value = (255, 255, 255, 1)
-        ouput_node = nodes.get("Material Output")
+        ouput_node = nodes.get('Material Output')
         material.node_tree.links.new(
             diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
 
@@ -353,7 +353,7 @@ class Render():
         self.rename_file_out_ms('wireframe')
         bpy.ops.render.render(write_still=True)
 
-        principled_bsdf = nodes.get("Principled BSDF")
+        principled_bsdf = nodes.get('Principled BSDF')
         material.node_tree.links.new(
             principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
         nodes.remove(diffuse_shader_node)
@@ -417,7 +417,7 @@ class Render():
         diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
         diffuse_shader_node.location = (100, 500)
 
-        ouput_node = nodes.get("Material Output")
+        ouput_node = nodes.get('Material Output')
         material.node_tree.links.new(
             diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
         shader_node = nodes.get('Principled BSDF')
@@ -436,7 +436,7 @@ class Render():
         bpy.ops.render.render(write_still=True)
 
         nodes.remove(image_texture_node)
-        principled_bsdf = nodes.get("Principled BSDF")
+        principled_bsdf = nodes.get('Principled BSDF')
         material.node_tree.links.new(
             principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
         nodes.remove(diffuse_shader_node)
@@ -451,14 +451,14 @@ class Render():
         world = bpy.context.scene.world
         world.use_nodes = True
 
-        background_node = world.node_tree.nodes.get("Background")
+        background_node = world.node_tree.nodes.get('Background')
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
         background_node.inputs['Strength'].default_value = 1
         background_node.location = -200, 0
         background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength
 
-        env_texture = world.node_tree.nodes.get("Environment Texture")
+        env_texture = world.node_tree.nodes.get('Environment Texture')
         if env_texture == None:
             env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
             env_texture.location = -500, 0
@@ -468,7 +468,7 @@ class Render():
                 bpy.context.scene.render_env_texture)
             env_texture.image = hdri_image
 
-        ouput_node = world.node_tree.nodes.get("World Output")
+        ouput_node = world.node_tree.nodes.get('World Output')
         ouput_node.location = 0, 0
 
         world.node_tree.links.new(
@@ -486,7 +486,7 @@ class Render():
         world = bpy.context.scene.world
         world.use_nodes = True
 
-        background_node = world.node_tree.nodes.get("Background")
+        background_node = world.node_tree.nodes.get('Background')
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
 
@@ -496,7 +496,7 @@ class Render():
 
         background_node.location = -200, 0
 
-        ouput_node = world.node_tree.nodes.get("World Output")
+        ouput_node = world.node_tree.nodes.get('World Output')
         ouput_node.location = 0, 0
 
         world.node_tree.links.new(
@@ -519,7 +519,7 @@ class OpenRenderDirectoryOperator(bpy.types.Operator):
 def on_env_texture_updated(self, context):
     world = bpy.context.scene.world
     world.use_nodes = True
-    env_texture = world.node_tree.nodes.get("Environment Texture")
+    env_texture = world.node_tree.nodes.get('Environment Texture')
     if env_texture == None:
         env_texture = world.node_tree.nodes.new('ShaderNodeTexEnvironment')
 
@@ -533,7 +533,7 @@ def on_env_texture_updated(self, context):
 def on_bg_strength_updated(self, context):
     world = bpy.context.scene.world
     world.use_nodes = True
-    background_node = world.node_tree.nodes.get("Background")
+    background_node = world.node_tree.nodes.get('Background')
     if background_node == None:
         background_node = world.node_tree.nodes.new('ShaderNodeBackground')
     background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength

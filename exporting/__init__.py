@@ -11,9 +11,9 @@ def register_exporting():
         bpy.utils.register_class(cls)
 
     bpy.types.Scene.export_out_path = bpy.props.StringProperty(
-        name="export_out_path",
+        name='export_out_path',
         default='//',
-        description="The folder your models will be saved to",
+        description='The folder your models will be saved to',
         subtype='DIR_PATH')
     bpy.types.Scene.export_type_obj = bpy.props.BoolProperty(name='export_type_obj',
                                                              default=True)
