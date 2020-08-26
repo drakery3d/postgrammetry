@@ -17,12 +17,14 @@ class DecimatePanel(bpy.types.Panel):
         row.prop(settings, 'is_iterative_mode', text='Use Iterative Mode')
 
         row = self.layout.row()
+        row.prop(settings, 'ratio', text='Ratio')
+
+        row = self.layout.row()
         if settings.is_iterative_mode:
             row.prop(settings, 'iterations', text='Iterations')
-            row = self.layout.row()
-            row.prop(settings, 'ratio', text='Ratio')
         else:
             row.prop(settings, 'vertices_threshold', text='Vertices Threshold')
 
+        self.layout.separator()
         row = self.layout.row()
         row.operator(f'{addon_id}.{decimate_idname}')

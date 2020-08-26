@@ -16,30 +16,37 @@ class DecimateOperator(bpy.types.Operator):
         if self.obj == None:
             self.report({'WARNING'}, 'No object selected.')
             return {'CANCELLED'}
-
         self.obj_base_name = self.obj.name.replace(
             '_lod0', '') if '_lod0' in self.obj.name else self.obj.name
 
         if self.settings.is_iterative_mode:
             self.iteratively(self.settings.iterations)
         else:
-            self.by_threshold(self.settings.vertices_threshold)
+            self.by_vertices_threshold(self.settings.vertices_threshold)
 
         return {'FINISHED'}
 
-    # Decimate object `steps` times
     def iteratively(self, steps):
         count = 1
         temp_obj = self.obj
         while count <= steps:
-            temp_obj = copy_object(temp_obj, self.obj_base_name + '_lod' + str(count))
-            select_obj(temp_obj)
-            bpy.ops.object.modifier_add(type='DECIMATE')
-            bpy.context.object.modifiers['Decimate'].ratio = self.settings.ratio
-            bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
+            temp_obj = self.copy_object_with_count(temp_obj, count)
+            self.apply_decimate_modifier(temp_obj, self.settings.ratio)
             count += 1
 
-    # Decimate object until its vertices are below `vertices_threshold`
-    def by_threshold(self, vertices_threshold):
-        # TODO implement vertex threshold decimate mode
-        print('Not implemented.')
+    def by_vertices_threshold(self, vertices_threshold):
+        count = 1
+        temp_obj = self.obj
+        while len(temp_obj.data.vertices) > vertices_threshold:
+            temp_obj = self.copy_object_with_count(temp_obj, count)
+            self.apply_decimate_modifier(temp_obj, self.settings.ratio)
+            count += 1
+
+    def apply_decimate_modifier(self, obj, ratio):
+        select_obj(obj)
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        bpy.context.object.modifiers['Decimate'].ratio = ratio
+        bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
+
+    def copy_object_with_count(self, obj, count):
+        return copy_object(obj, self.obj_base_name + '_lod' + str(count))
