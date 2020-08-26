@@ -1,21 +1,25 @@
 import bpy
 
+from ..constants import addon_id, panel, texture_resize_idname, texture_resize_open_idname
+
 
 class ResizePanel(bpy.types.Panel):
+    bl_idname = f'VIEW3D_PT_{texture_resize_idname}'
     bl_label = 'Texture Resizing'
-    bl_idname = 'MAIN_PT_batch_resizing'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Postgrammetry'
+    bl_space_type = panel['space_type']
+    bl_region_type = panel['region_type']
+    bl_category = panel['category']
 
     def draw(self, context):
-        layout = self.layout
+        settings = context.scene.postgrammetry_texture_resize
 
-        row = layout.column()
-        row.prop(context.scene, 'resize_path', text='')
-        row = layout.row()
-        row.operator('postgrammetry.resize_open_directory',
-                     text='Open directory')
+        row = self.layout.column()
+        row.prop(settings, 'path', text='Source')
 
-        row = layout.row()
-        row.operator('postgrammetry.resize_textures', text='Resize Textures')
+        row = self.layout.row()
+        row.operator(f'{addon_id}.{texture_resize_open_idname}', text='Open')
+
+        self.layout.separator()
+        row = self.layout.row()
+        row.operator(f'{addon_id}.{texture_resize_idname}',
+                     text='Resize Textures', icon='RENDER_RESULT')
