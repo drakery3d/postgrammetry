@@ -1,5 +1,3 @@
-# TODO decimate mode 'decimate until less than X vertices'
-
 import bpy
 
 from ..constants import addon_id, decimate_idname
@@ -12,24 +10,36 @@ class DecimateOperator(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     def execute(self, context):
-        selected_obj = bpy.context.view_layer.objects.active
-        if selected_obj == None:
+        self.settings = bpy.context.scene.postgrammetry_decimate
+
+        self.obj = bpy.context.view_layer.objects.active
+        if self.obj == None:
             self.report({'WARNING'}, 'No object selected.')
             return {'CANCELLED'}
 
-        base_name = selected_obj.name.replace(
-            '_lod0', '') if '_lod0' in selected_obj.name else selected_obj.name
-        decimation_steps = bpy.context.scene.postgrammetry_decimate.iterations
-        decimation_ratio = bpy.context.scene.postgrammetry_decimate.ratio
+        self.obj_base_name = self.obj.name.replace(
+            '_lod0', '') if '_lod0' in self.obj.name else self.obj.name
+
+        if self.settings.is_iterative_mode:
+            self.iteratively(self.settings.iterations)
+        else:
+            self.by_threshold(self.settings.vertices_threshold)
+
+        return {'FINISHED'}
+
+    # Decimate object `steps` times
+    def iteratively(self, steps):
         count = 1
-        temp_obj = selected_obj
-        while count <= decimation_steps:
-            temp_obj = copy_object(
-                temp_obj, base_name + '_lod' + str(count))
+        temp_obj = self.obj
+        while count <= steps:
+            temp_obj = copy_object(temp_obj, self.obj_base_name + '_lod' + str(count))
             select_obj(temp_obj)
             bpy.ops.object.modifier_add(type='DECIMATE')
-            bpy.context.object.modifiers['Decimate'].ratio = decimation_ratio
+            bpy.context.object.modifiers['Decimate'].ratio = self.settings.ratio
             bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
             count += 1
 
-        return {'FINISHED'}
+    # Decimate object until its vertices are below `vertices_threshold`
+    def by_threshold(self, vertices_threshold):
+        # TODO implement vertex threshold decimate mode
+        print('Not implemented.')

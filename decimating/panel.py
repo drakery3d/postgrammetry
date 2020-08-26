@@ -13,12 +13,16 @@ class DecimatePanel(bpy.types.Panel):
     def draw(self, context):
         settings = context.scene.postgrammetry_decimate
 
-        row = self.layout.column()
         row = self.layout.row()
-        row.prop(settings, 'iterations', text='Iterations')
+        row.prop(settings, 'is_iterative_mode', text='Use Iterative Mode')
 
         row = self.layout.row()
-        row.prop(settings, 'ratio', text='Ratio')
+        if settings.is_iterative_mode:
+            row.prop(settings, 'iterations', text='Iterations')
+            row = self.layout.row()
+            row.prop(settings, 'ratio', text='Ratio')
+        else:
+            row.prop(settings, 'vertices_threshold', text='Vertices Threshold')
 
         row = self.layout.row()
         row.operator(f'{addon_id}.{decimate_idname}')

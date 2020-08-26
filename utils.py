@@ -69,9 +69,6 @@ def copy_object(source_obj, obj_copy_name):
     obj_copy = source_obj.copy()
     obj_copy.data = source_obj.data.copy()
     obj_copy.animation_data_clear()
-    # bpy.context.scene.objects.link(obj_copy)
-    # bpy.data.scenes[0].objects.link(obj_copy)
-    # bpy.context.scene.objects.link(obj_copy)
     bpy.context.collection.objects.link(obj_copy)
     obj_copy.name = obj_copy_name
     return obj_copy
