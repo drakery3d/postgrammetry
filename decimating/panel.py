@@ -27,4 +27,8 @@ class DecimatePanel(bpy.types.Panel):
 
         self.layout.separator()
         row = self.layout.row()
+        row.prop(settings, 'preview_ratio', text='Preview ratio')
+
+        self.layout.separator()
+        row = self.layout.row()
         row.operator(f'{addon_id}.{decimate_idname}', icon='MOD_DECIM')

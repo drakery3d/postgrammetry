@@ -19,6 +19,10 @@ class DecimateOperator(bpy.types.Operator):
         self.obj_base_name = self.obj.name.replace(
             '_lod0', '') if '_lod0' in self.obj.name else self.obj.name
 
+        decimate = bpy.context.object.modifiers.get('Decimate')
+        if decimate is not None:
+            bpy.context.object.modifiers.remove(decimate)
+
         if self.settings.is_iterative_mode:
             count, lod_n = self.iteratively(self.settings.iterations)
         else:
@@ -35,7 +39,7 @@ class DecimateOperator(bpy.types.Operator):
         temp_obj = self.obj
         while count <= steps:
             temp_obj = self.copy_object_with_count(temp_obj, count)
-            self.apply_decimate_modifier(temp_obj, self.settings.ratio)
+            apply_decimate_modifier(temp_obj, self.settings.ratio)
             count += 1
         return count, temp_obj
 
@@ -44,15 +48,29 @@ class DecimateOperator(bpy.types.Operator):
         temp_obj = self.obj
         while len(temp_obj.data.vertices) > vertices_threshold:
             temp_obj = self.copy_object_with_count(temp_obj, count)
-            self.apply_decimate_modifier(temp_obj, self.settings.ratio)
+            apply_decimate_modifier(temp_obj, self.settings.ratio)
             count += 1
         return count, temp_obj
 
-    def apply_decimate_modifier(self, obj, ratio):
-        select_obj(obj)
-        bpy.ops.object.modifier_add(type='DECIMATE')
-        bpy.context.object.modifiers['Decimate'].ratio = ratio
-        bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
-
     def copy_object_with_count(self, obj, count):
         return copy_object(obj, self.obj_base_name + '_lod' + str(count))
+
+
+def add_decimate_modifier(obj, ratio):
+    select_obj(obj)
+    decimate = bpy.context.object.modifiers.get('Decimate')
+    if decimate is None:
+        bpy.ops.object.modifier_add(type='DECIMATE')
+        decimate = bpy.context.object.modifiers['Decimate']
+    decimate.ratio = ratio
+
+
+def apply_decimate_modifier(obj, ratio):
+    add_decimate_modifier(obj, ratio)
+    bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
+
+
+def on_preview_ratio_updated(self, context):
+    settings = bpy.context.scene.postgrammetry_decimate
+    obj = bpy.context.view_layer.objects.active
+    add_decimate_modifier(obj, settings.preview_ratio)
