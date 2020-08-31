@@ -6,6 +6,7 @@ import addon_utils
 import math
 import time
 import os
+from PIL import Image
 
 from ..utils import get_absolute_path, open_os_directory, un_hide, hide, deselect_all, hide_all_except, select_obj
 
@@ -59,6 +60,8 @@ class Render():
             self.render_wireframe()
         if bpy.context.scene.render_uv_grid:
             self.render_uv_grid()
+        if bpy.context.scene.render_uv_layout:
+            self.render_uv_layout()
 
         self.setup_cycles()
 
@@ -179,8 +182,12 @@ class Render():
         self.rename_file_out_ms('render')
 
     def rename_file_out_ms(self, name):
+        prefix = self.get_file_name_prefix(name)
+        self.rename_compositing_file_outputs(prefix)
+
+    def get_file_name_prefix(self, name):
         ms = int(round(time.time() * 1000))
-        self.rename_compositing_file_outputs(f'{str(ms)}_{name}_')
+        return f'{str(ms)}_{name}_'
 
     def rename_compositing_file_outputs(self, prefix):
         transparent_name = prefix + 'transparent'
@@ -442,6 +449,35 @@ class Render():
             principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
         nodes.remove(diffuse_shader_node)
 
+    def render_uv_layout(self):
+        select_obj(self.obj)
+        bpy.ops.object.mode_set(mode="EDIT")
+        bpy.ops.mesh.select_all(action='TOGGLE')
+        bpy.ops.mesh.select_all(action='TOGGLE')
+        filepath = get_absolute_path(bpy.context.scene.render_out_path)
+        filename = self.get_file_name_prefix('uv_layout')
+        min_size = min(bpy.context.scene.render.resolution_x,
+                       bpy.context.scene.render.resolution_y)
+        res_perc = bpy.context.scene.render.resolution_percentage
+        size = int(min_size * res_perc * 0.01)
+
+        if bpy.context.scene.render_transparent:
+            bpy.ops.uv.export_layout(
+                filepath=f'{filepath}/{filename}transparent.png', size=(size, size), opacity=1)
+        if bpy.context.scene.render_black_bg:
+            path = f'{filepath}/{filename}black-bg.png'
+            # TODO render black bg
+            bpy.ops.uv.export_layout(
+                filepath=path, size=(size, size), opacity=1)
+
+        if bpy.context.scene.render_white_bg:
+            # TODO render white bg
+            path = f'{filepath}/{filename}white-bg.png'
+            bpy.ops.uv.export_layout(
+                filepath=path, size=(size, size), opacity=1)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.select_all(action='TOGGLE')
+
     def setup_cycles(self):
         bpy.context.scene.render.engine = 'CYCLES'
         bpy.context.scene.view_layers[0].cycles.denoising_store_passes = True
@@ -543,14 +579,6 @@ def on_bg_strength_updated(self, context):
 def on_turntable_rotation_updated(self, context):
     obj = bpy.context.object
     obj.rotation_euler[2] = bpy.context.scene.render_turntable_rotation
-
-
-def on_saturation_updated():
-    print('heljo')
-
-
-def on_contrast_updated():
-    print('heljo')
 
 
 def setup_defaults():

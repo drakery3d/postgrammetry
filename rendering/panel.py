@@ -61,6 +61,11 @@ class RenderPanel(bpy.types.Panel):
         row = col.row(align=True)
 
         row = col.row(align=True)
+        row.prop(context.scene, 'render_uv_layout',
+                 icon='UV_FACESEL', text='UV Layout')
+        row = col.row(align=True)
+
+        row = col.row(align=True)
         row.prop(context.scene, 'render_wireframe',
                  icon='SHADING_WIRE', text='Wireframe')
         if bpy.context.scene.render_wireframe:

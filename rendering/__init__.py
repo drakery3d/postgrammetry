@@ -55,6 +55,8 @@ def register_rendering():
                                                               default=True)
     bpy.types.Scene.render_full = bpy.props.BoolProperty(name='render_full',
                                                          default=False)
+    bpy.types.Scene.render_uv_layout = bpy.props.BoolProperty(name='render_uv_layout',
+                                                              default=True)
 
     bpy.types.Scene.render_transparent = bpy.props.BoolProperty(name='render_transparent',
                                                                 default=True)
