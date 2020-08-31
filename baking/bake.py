@@ -22,9 +22,7 @@ class BatchBakeOperator(bpy.types.Operator):
             hide(obj_name)
 
         self.low_objects_names = [
-            obj.name for obj in bpy.data.collections[
-                context.scene.lowpoly_bake_obj].all_objects
-        ]
+            obj.name for obj in bpy.data.collections[context.scene.lowpoly_bake_obj].all_objects]
         for obj_name in self.low_objects_names:
             Bake(high, obj_name)
 
@@ -41,6 +39,9 @@ class Bake():
     def __init__(self, high, low):
         self.high = high
         self.low = low
+        low_obj = bpy.data.objects.get(self.low)
+        for face in low_obj.data.polygons:
+            face.use_smooth = True
 
         self.prepare()
         self.bake()
