@@ -236,11 +236,12 @@ class Render():
     def render_turntable(self):
         self.setup_cycles()
         number_of_pics = bpy.context.scene.turntable_image_count
+        self.obj.rotation_euler[2] = 0
         count = 0
         for _ in range(number_of_pics):
-            self.obj.rotation_euler[2] += 2 * math.pi / number_of_pics
             self.rename_file_out_ms('turntable_' + str(count))
             bpy.ops.render.render(write_still=True)
+            self.obj.rotation_euler[2] += 2 * math.pi / number_of_pics
             count += 1
         self.obj.rotation_euler[2] = 0
 
