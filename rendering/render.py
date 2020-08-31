@@ -455,7 +455,6 @@ class Render():
         background_node = world.node_tree.nodes.get('Background')
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
-        background_node.inputs['Strength'].default_value = 1
         background_node.location = -200, 0
         background_node.inputs['Strength'].default_value = bpy.context.scene.render_bg_strength
 
@@ -490,6 +489,7 @@ class Render():
         background_node = world.node_tree.nodes.get('Background')
         if background_node == None:
             background_node = world.node_tree.nodes.new('ShaderNodeBackground')
+        background_node.inputs['Strength'].default_value = 1
 
         for link in background_node.inputs['Color'].links:
             world.node_tree.links.remove(link)
