@@ -6,7 +6,6 @@ import addon_utils
 import math
 import time
 import os
-from PIL import Image
 
 from ..utils import get_absolute_path, open_os_directory, un_hide, hide, deselect_all, hide_all_except, select_obj
 
