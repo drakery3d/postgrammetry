@@ -2,10 +2,14 @@
 # TODO add sun with sun addon
 
 import bpy
+import gpu
+import bgl
 import addon_utils
 import math
 import time
 import os
+import io_mesh_uv_layout
+from io_mesh_uv_layout.export_uv_png import *
 
 from ..utils import get_absolute_path, open_os_directory, un_hide, hide, deselect_all, hide_all_except, select_obj
 
@@ -453,6 +457,18 @@ class Render():
         bpy.ops.object.mode_set(mode="EDIT")
         bpy.ops.mesh.select_all(action='TOGGLE')
         bpy.ops.mesh.select_all(action='TOGGLE')
+
+        if bpy.context.scene.render_transparent:
+            self.render_uv_layout_with_bg_color('transparent', 0, 0, 0, 0)
+        if bpy.context.scene.render_black_bg:
+            self.render_uv_layout_with_bg_color('black-bg', 0, 0, 0, 1)
+        if bpy.context.scene.render_white_bg:
+            self.render_uv_layout_with_bg_color('white-bg', 1, 1, 1, 1)
+
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.select_all(action='TOGGLE')
+
+    def render_uv_layout_with_bg_color(self, file_name_suffix, red, green, blue, alpha):
         filepath = get_absolute_path(bpy.context.scene.render_out_path)
         filename = self.get_file_name_prefix('uv_layout')
         min_size = min(bpy.context.scene.render.resolution_x,
@@ -460,22 +476,29 @@ class Render():
         res_perc = bpy.context.scene.render.resolution_percentage
         size = int(min_size * res_perc * 0.01)
 
-        if bpy.context.scene.render_transparent:
-            bpy.ops.uv.export_layout(
-                filepath=f'{filepath}/{filename}transparent.png', size=(size, size), opacity=1)
-        if bpy.context.scene.render_black_bg:
-            path = f'{filepath}/{filename}black-bg.png'
-            # TODO render black bg
-            bpy.ops.uv.export_layout(
-                filepath=path, size=(size, size), opacity=1)
+        self.override_internal_uv_layout_export_method(red, green, blue, alpha)
+        path = f'{filepath}/{filename}{file_name_suffix}.png'
+        bpy.ops.uv.export_layout(
+            filepath=path, size=(size, size), opacity=1)
 
-        if bpy.context.scene.render_white_bg:
-            # TODO render white bg
-            path = f'{filepath}/{filename}white-bg.png'
-            bpy.ops.uv.export_layout(
-                filepath=path, size=(size, size), opacity=1)
-        bpy.ops.object.mode_set(mode="OBJECT")
-        bpy.ops.object.select_all(action='TOGGLE')
+    def override_internal_uv_layout_export_method(self, red, green, blue, alpha):
+        def new_export(filepath, face_data, colors, width, height, opacity):
+            offscreen = gpu.types.GPUOffScreen(width, height)
+            offscreen.bind()
+
+            try:
+                bgl.glClearColor(red, green, blue, alpha)
+                bgl.glClear(bgl.GL_COLOR_BUFFER_BIT)
+                draw_image(face_data, opacity)
+
+                pixel_data = get_pixel_data_from_current_back_buffer(
+                    width, height)
+                save_pixels(filepath, pixel_data, width, height)
+            finally:
+                offscreen.unbind()
+                offscreen.free()
+
+        io_mesh_uv_layout.export_uv_png.export = new_export
 
     def setup_cycles(self):
         bpy.context.scene.render.engine = 'CYCLES'
