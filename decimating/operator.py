@@ -67,7 +67,7 @@ def add_decimate_modifier(obj, ratio):
 
 def apply_decimate_modifier(obj, ratio):
     add_decimate_modifier(obj, ratio)
-    bpy.ops.object.modifier_apply(apply_as='DATA', modifier='Decimate')
+    bpy.ops.object.modifier_apply(modifier='Decimate')
 
 
 def on_preview_ratio_updated(self, context):
