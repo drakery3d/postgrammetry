@@ -44,7 +44,10 @@ class Render():
         setup_addon()
 
         for obj_name in [obj.name for obj in bpy.data.objects]:
-            hide(obj_name)
+            if not obj_name.startswith('__'):
+                hide(obj_name)
+            else:
+                un_hide(obj_name)
 
         self.obj = bpy.context.object
         un_hide(self.obj.name)
@@ -345,7 +348,7 @@ class Render():
         linestyle.select_edge_mark = True
 
         bpy.data.linestyles['LineStyle'].color = (0, 0, 0)
-        bpy.data.linestyles['LineStyle'].thickness = 1.5
+        bpy.data.linestyles['LineStyle'].thickness = 2
 
         material = obj.material_slots[0].material
         nodes = material.node_tree.nodes
