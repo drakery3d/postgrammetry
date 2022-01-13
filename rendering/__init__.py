@@ -1,13 +1,10 @@
-# TODO background option for environment
-
 import bpy
-import math
 
 from .panel import RenderPanel
-from .render import BatchRenderOperator, OpenRenderDirectoryOperator, RenderSetupOperator, on_env_texture_updated, on_bg_strength_updated, on_turntable_rotation_updated, on_contrast_updated, on_saturation_updated
+from .render import BatchRenderOperator, OpenRenderDirectoryOperator
 
 classes = (RenderPanel, BatchRenderOperator,
-           OpenRenderDirectoryOperator, RenderSetupOperator)
+           OpenRenderDirectoryOperator)
 
 
 def register_rendering():
@@ -28,19 +25,6 @@ def register_rendering():
         name='turntable_image_count',
         default=7)
 
-    bpy.types.Scene.render_env_texture = bpy.props.StringProperty(
-        name='render_env_texture', subtype='FILE_PATH', update=on_env_texture_updated)
-    bpy.types.Scene.render_bg_strength = bpy.props.FloatProperty(
-        name='render_bg_strength', default=1.0, update=on_bg_strength_updated)
-
-    bpy.types.Scene.render_turntable_rotation = bpy.props.FloatProperty(
-        name='render_turntable_rotation', default=0, subtype='ANGLE', step=30, soft_min=0, soft_max=math.radians(360), update=on_turntable_rotation_updated)
-
-    bpy.types.Scene.render_contrast = bpy.props.FloatProperty(
-        name='render_contrast', default=0.0, step=0.1, soft_min=-3, soft_max=3, update=on_contrast_updated)
-    bpy.types.Scene.render_saturation = bpy.props.FloatProperty(
-        name='render_saturation', default=1.0, step=0.1, soft_min=0, soft_max=3, update=on_saturation_updated)
-
     bpy.types.Scene.render_wireframe = bpy.props.BoolProperty(name='render_wireframe',
                                                               default=True)
     bpy.types.Scene.render_wireframe_look_for_lods = bpy.props.BoolProperty(
@@ -58,13 +42,6 @@ def register_rendering():
     bpy.types.Scene.render_uv_layout = bpy.props.BoolProperty(name='render_uv_layout',
                                                               default=True)
 
-    bpy.types.Scene.render_transparent = bpy.props.BoolProperty(name='render_transparent',
-                                                                default=True)
-    bpy.types.Scene.render_black_bg = bpy.props.BoolProperty(name='render_black_bg',
-                                                             default=True)
-    bpy.types.Scene.render_white_bg = bpy.props.BoolProperty(name='render_white_bg',
-                                                             default=True)
-
 
 def unregister_rendering():
     for cls in classes:
@@ -73,11 +50,6 @@ def unregister_rendering():
     del bpy.types.Scene.turntable_image_count
     del bpy.types.Scene.render_out_path
 
-    del bpy.types.Scene.render_env_texture
-    del bpy.types.Scene.render_bg_strength
-    del bpy.types.Scene.render_contrast
-    del bpy.types.Scene.render_saturation
-
     del bpy.types.Scene.render_wireframe
     del bpy.types.Scene.render_wireframe_look_for_lods
     del bpy.types.Scene.render_texture_maps
@@ -85,7 +57,3 @@ def unregister_rendering():
     del bpy.types.Scene.render_uv_grid
     del bpy.types.Scene.render_turntable
     del bpy.types.Scene.render_full
-
-    del bpy.types.Scene.render_transparent
-    del bpy.types.Scene.render_black_bg
-    del bpy.types.Scene.render_white_bg

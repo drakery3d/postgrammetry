@@ -11,10 +11,6 @@ class RenderPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        row = layout.row()
-        row.operator('postgrammetry.render_setup', text='Setup')
-        layout.separator()
-
         # render settings
         row = layout.row()
         row.prop(bpy.context.scene.cycles, 'samples')
@@ -23,19 +19,6 @@ class RenderPanel(bpy.types.Panel):
         row.prop(bpy.context.scene.render, 'resolution_y')
         row = layout.row()
         row.prop(bpy.context.scene.render, 'resolution_percentage')
-
-        row = layout.row()
-        row.prop(bpy.context.scene, 'render_contrast', text='Contrast')
-        row = layout.row()
-        row.prop(bpy.context.scene, 'render_saturation', text='Saturation')
-
-        row = layout.row()
-        row.prop(context.scene, 'render_env_texture', text='HDRI')
-        row = layout.row()
-        row.prop(context.scene, 'render_bg_strength', text='Strength')
-        row = layout.row()
-        # TODO use 'postgrammetry_properties.<someting>' too (may also be easier to unregister addon)
-        row.prop(context.scene.sun_pos_properties, 'hdr_azimuth')
 
         # modes
         row = layout.row()
@@ -82,22 +65,6 @@ class RenderPanel(bpy.types.Panel):
             row = layout.row()
             row.prop(context.scene, 'render_turntable_rotation',
                      text='Preview Rotation')
-
-        # background modes
-        row = layout.row()
-        row.label(text='Backgrounds')
-        box = layout.box()
-        col = box.column(align=True)
-        row = col.row(align=True)
-        row.prop(context.scene, 'render_transparent',
-                 icon='TEXTURE', text='Transparent')
-        row = col.row(align=True)
-        row.prop(context.scene, 'render_black_bg',
-                 icon='COLORSET_16_VEC', text='Black')
-        row = col.row(align=True)
-        row.prop(context.scene, 'render_white_bg',
-                 icon='SNAP_FACE', text='White')
-        row = col.row(align=True)
 
         layout.separator()
 

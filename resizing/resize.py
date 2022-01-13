@@ -17,7 +17,8 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
         for file in os.listdir(path):
             filepath = os.path.join(path, file)
             if os.path.isfile(filepath):
-                if os.path.splitext(file)[1] == '.tif':
+                extension = os.path.splitext(file)[1]
+                if extension == '.tif' or extension == '.png':
                     index = bpy.data.images.find(file)
                     image = bpy.data.images[index] if index >= 0 else bpy.data.images.load(
                         filepath)
@@ -33,10 +34,10 @@ class BatchResizeTexturesOperator(bpy.types.Operator):
             return self.report(
                 {'WARNING'}, f'Image is not a square. Skip {image.name}')
 
-        SMALLEST_SIZE = 2**11  # 2048
+        SMALLEST_SIZE = 2**12  # 4096
         if image_size < SMALLEST_SIZE:
             return self.report(
-                {'WARNING'}, f'Image is too small to reisze. Skip {image.name}')
+                {'WARNING'}, f'Image is too small to resize. Skip {image.name}')
 
         sizes = []
         s = SMALLEST_SIZE

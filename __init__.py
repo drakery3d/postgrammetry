@@ -10,8 +10,8 @@ bl_info = {
     'author': 'Florian Ludewig',
     'description':
     'Automation tools for post photogrammetry asset creation',
-    'blender': (2, 80, 0),
-    'version': (0, 7, 0),
+    'blender': (3, 0, 0),
+    'version': (0, 8, 0),
     'location': 'View3D',
     'category': 'Automation'
 }
