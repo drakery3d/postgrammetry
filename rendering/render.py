@@ -182,45 +182,82 @@ class Render():
         self.teardown_evee()
 
     def render_wireframe_for_objects(self, objects):
+        # TODO user input for wireframe body and wireframe material
+
+        # create wireframe body material
+        wireframe_body_material_name = 'postgrammetry_wireframe_body_material'
+        wireframe_body_material = bpy.data.materials.get(
+            wireframe_body_material_name)
+        if wireframe_body_material == None:
+            wireframe_body_material = bpy.data.materials.new(
+                name=wireframe_body_material_name)
+        wireframe_body_material.use_nodes = True
+        nodes = wireframe_body_material.node_tree.nodes
+        wireframe_shader_node = nodes.get('Principled BSDF')
+        wireframe_shader_node.inputs['Base Color'].default_value = (
+            0.5, 0.5, 0.5, 1)
+        wireframe_shader_node.inputs['Roughness'].default_value = 0.2
+
+        # create wireframe material
+        wireframe_material_name = 'postgrammetry_wireframe_material'
+        wireframe_material = bpy.data.materials.get(wireframe_material_name)
+        if wireframe_material == None:
+            wireframe_material = bpy.data.materials.new(
+                name=wireframe_material_name)
+        wireframe_material.use_nodes = True
+        nodes = wireframe_material.node_tree.nodes
+        wireframe_shader_node = nodes.get('Principled BSDF')
+        wireframe_shader_node.inputs['Base Color'].default_value = (0, 0, 0, 1)
+
+        # persist current materials
+        obj_materials = []
+
         for obj in objects:
             select_obj(obj)
+            bpy.ops.object.shade_flat()
 
-            bpy.context.scene.render.use_freestyle = True
-            scene = bpy.context.scene
-            freestyle = scene.view_layers[0].freestyle_settings
-            linestyle = freestyle.linesets[0]
-            scene.render.use_freestyle = True
-            linestyle.select_silhouette = False
-            linestyle.select_border = False
-            linestyle.select_crease = False
-            linestyle.select_edge_mark = True
+            # save current materials
+            obj_materials.append([])
+            obj.active_material_index = 0
+            for i in range(len(obj.material_slots)):
+                obj_materials[-1].append(obj.material_slots[0].material)
+                bpy.ops.object.material_slot_remove({'object': obj})
 
-            bpy.data.linestyles['LineStyle'].color = (0, 0, 0)
-            bpy.data.linestyles['LineStyle'].thickness = 2
+            # set wireframe body material
+            bpy.ops.object.material_slot_add()
+            obj.material_slots[-1].material = wireframe_body_material
 
-            material = obj.material_slots[0].material
-            nodes = material.node_tree.nodes
-            diffuse_shader_node = nodes.new('ShaderNodeBsdfDiffuse')
-            diffuse_shader_node.location = (100, 500)
-            diffuse_shader_node.inputs['Color'].default_value = (
-                255, 255, 255, 1)
-            ouput_node = nodes.get('Material Output')
-            material.node_tree.links.new(
-                diffuse_shader_node.outputs['BSDF'], ouput_node.inputs['Surface'])
+            # set wireframe material
+            bpy.ops.object.material_slot_add()
+            obj.material_slots[-1].material = wireframe_material
 
-            bpy.ops.object.mode_set(mode='EDIT')
-            bpy.ops.mesh.select_all(action='SELECT')
-            bpy.ops.mesh.mark_freestyle_edge()
-            bpy.ops.object.mode_set(mode='OBJECT')
+            # apply wireframe modifier
+            bpy.ops.object.modifier_add(type='WIREFRAME')
+            # TODO user input for wireframe thickness
+            bpy.context.object.modifiers["Wireframe"].thickness = 0.0001
+            bpy.context.object.modifiers["Wireframe"].use_replace = False
+            bpy.context.object.modifiers["Wireframe"].material_offset = 1
 
         self.rename_file_out_ms('wireframe')
         bpy.ops.render.render(write_still=True)
 
-        principled_bsdf = nodes.get('Principled BSDF')
-        material.node_tree.links.new(
-            principled_bsdf.outputs['BSDF'], ouput_node.inputs['Surface'])
-        nodes.remove(diffuse_shader_node)
-        bpy.context.scene.render.use_freestyle = False
+        print(obj_materials)
+
+        for index, obj in enumerate(objects):
+            select_obj(obj)
+
+            # remove wireframe materials
+            obj.active_material_index = 0
+            for i in range(len(obj.material_slots)):
+                bpy.ops.object.material_slot_remove({'object': obj})
+
+            # add back previous materials
+            for material in obj_materials[index]:
+                bpy.ops.object.material_slot_add()
+                obj.material_slots[-1].material = material
+
+            # remove wireframe modifier
+            bpy.ops.object.modifier_remove(modifier="Wireframe")
 
     def render_matcap(self):
         self.setup_cycles()
@@ -374,17 +411,17 @@ class Render():
         bpy.context.scene.cycles.use_adaptive_sampling = True
         bpy.context.scene.cycles.adaptive_threshold = 0.01
         bpy.context.scene.cycles.device = 'GPU'
-        world = bpy.context.scene.world
-        world.use_nodes = True
+        # world = bpy.context.scene.world
+        # world.use_nodes = True
 
-        background_node = world.node_tree.nodes.get('Background')
-        if background_node == None:
-            background_node = world.node_tree.nodes.new('ShaderNodeBackground')
+        # background_node = world.node_tree.nodes.get('Background')
+        # if background_node == None:
+        #     background_node = world.node_tree.nodes.new('ShaderNodeBackground')
 
-        env_texture = world.node_tree.nodes.get('Environment Texture')
-        if env_texture:
-            world.node_tree.links.new(
-                env_texture.outputs['Color'], background_node.inputs['Color'])
+        # env_texture = world.node_tree.nodes.get('Environment Texture')
+        # if env_texture:
+        #     world.node_tree.links.new(
+        #         env_texture.outputs['Color'], background_node.inputs['Color'])
 
         self.setup_compositing_nodes()
 
@@ -398,6 +435,8 @@ class Render():
 
         world = bpy.context.scene.world
         world.use_nodes = True
+
+        # TODO save current background and reapply on teardown
 
         background_node = world.node_tree.nodes.get('Background')
         if background_node == None:
